@@ -1,0 +1,59 @@
+* {
+    box-sizing: border-box;
+    margin: 0px;
+}
+
+#root {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+div.title {
+    text-align: center;
+}
+
+div.tests,
+div.commands
+{
+    padding: 5px;
+    border-bottom: 1px solid grey;
+}
+
+div.commands {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+div.commands.rx-input,
+div.commands.rx-btn {
+    margin: 5px;
+}
+
+div.commands.rx-input {
+    flex-basis: 1 0 auto;
+}
+
+div.text {
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+div.text .content {
+    overflow-y: auto;
+    flex-grow: 1;
+    padding: 5px;
+}
+
+div.line {
+    min-height: 20px;
+    padding: 1px;
+}
+
+div.line.empty {
+    width: 1px;
+    height: 20px;
+}
