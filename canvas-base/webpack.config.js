@@ -1,13 +1,20 @@
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+//const CleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 module.exports = {
     entry: './src/app.js',
     output: {
-        filename: './bundle.js'
+      path: path.resolve(__dirname, 'dist'),
+      filename: './bundle.js'
     },
     watch: true,
-    devtool: 'source-map',
-	performance : {
-		hints : false
-	},
+    devtool: 'inline-source-map',
+    devServer: {
+      contentBase: path.join(__dirname, "dist"),
+      port: 9000
+    },
     module: {
         rules: [
         {
@@ -19,12 +26,20 @@ module.exports = {
         },{
           test: /\.js$/,
           exclude: /(node_modules)///,
-          /*loader: 'babel-loader',
+         /* loader: 'babel-loader',
           query: { 
-            //presets: ['env'],
+            presets: ['env']
             //plugins: ['transform-class-properties']
-			plugins: ["transform-es2015-modules-commonjs"]
-          } */
+			     // plugins: ["transform-es2015-modules-commonjs"]
+          }*/
         }]
-    }
+    },
+    plugins: [
+      new HtmlWebpackPlugin({title: 'Output Management'}),
+      //new CleanWebpackPlugin(['dist']),
+      new CopyWebpackPlugin([{
+          from: './src/index.html',
+          to: './index.html'
+      }])
+    ]
   };
