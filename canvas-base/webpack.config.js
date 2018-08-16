@@ -1,13 +1,16 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 //const CleanWebpackPlugin = require('clean-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+//const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: './src/app.js',
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: './bundle.js'
+    },
+    externals: {
+      canvas: 'canvas-5-polyfill'
     },
     watch: true,
     devtool: 'inline-source-map',
@@ -35,11 +38,14 @@ module.exports = {
         }]
     },
     plugins: [
-      new HtmlWebpackPlugin({title: 'Output Management'}),
+      //new HtmlWebpackPlugin({title: 'Output Management'}),
       //new CleanWebpackPlugin(['dist']),
       new CopyWebpackPlugin([{
           from: './src/index.html',
           to: './index.html'
+      },{
+        from: './node_modules/canvas-5-polyfill/canvas.js',
+        to: './canvas.js'
       }])
     ]
   };
