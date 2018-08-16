@@ -11,7 +11,7 @@
     "@types/react": "^16.4.11",
     "@types/react-dom": "^16.0.7",
     "gl-matrix": "^2.7.1",
-    "mathjs": "5.0.4",
+    "mathjs": "5.1.0",
     "parcel-plugin-typescript": "^1.0.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
