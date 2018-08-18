@@ -1,5 +1,5 @@
 import * as React from 'react';
-import './app.css';
+import { appContainer, appSidebar } from './app.css';
 import Canvas from './canvas';
 
 class App extends React.Component
@@ -12,8 +12,8 @@ class App extends React.Component
     render()
     {
         return (
-            <div className="app-container">
-                <div className="app-sidebar"></div>
+            <div className={appContainer}>
+                <div className={appSidebar}></div>
                 <Canvas />
             </div>
         );

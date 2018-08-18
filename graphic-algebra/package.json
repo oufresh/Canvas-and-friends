@@ -1,15 +1,17 @@
 {
-  "name": "parcel-sandbox",
+  "name": "graphic-algebra",
   "version": "1.0.0",
-  "description": "Simple Parcel Sandbox",
+  "description": "Graphic algebra with canvas for rendering",
   "main": "src/index.html",
   "scripts": {
     "start": "parcel src/index.html --open",
     "build": "parcel build src/index.html"
   },
   "dependencies": {
+    "@types/mathjs": "^4.4.1",
     "@types/react": "^16.4.11",
     "@types/react-dom": "^16.0.7",
+    "autoprefixer": "^9.1.1",
     "gl-matrix": "^2.7.1",
     "mathjs": "5.1.0",
     "parcel-plugin-typescript": "^1.0.0",
@@ -18,6 +20,8 @@
     "typescript": "3.0.1"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.6.1"
+    "@types/gl-matrix": "^2.4.1",
+    "parcel-bundler": "^1.6.1",
+    "postcss-modules": "^1.3.2"
   }
 }
