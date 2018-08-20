@@ -8,18 +8,18 @@
     "build": "parcel build src/index.html"
   },
   "dependencies": {
+    "gl-matrix": "^2.7.1",
+    "mathjs": "5.1.0",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2"
+  },
+  "devDependencies": {
+    "typescript": "3.0.1",
+    "parcel-plugin-typescript": "^1.0.0",
+    "autoprefixer": "^9.1.1",
     "@types/mathjs": "^4.4.1",
     "@types/react": "^16.4.11",
     "@types/react-dom": "^16.0.7",
-    "autoprefixer": "^9.1.1",
-    "gl-matrix": "^2.7.1",
-    "mathjs": "5.1.0",
-    "parcel-plugin-typescript": "^1.0.0",
-    "react": "^16.4.2",
-    "react-dom": "^16.4.2",
-    "typescript": "3.0.1"
-  },
-  "devDependencies": {
     "@types/gl-matrix": "^2.4.1",
     "parcel-bundler": "^1.6.1",
     "postcss-modules": "^1.3.2"
