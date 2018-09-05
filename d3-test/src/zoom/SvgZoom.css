@@ -1,3 +1,10 @@
+.svgZoomCont {
+    position: relative;
+    border: 1px solid black;
+    width: 802px;
+    height: 602px;
+}
+
 .svgZoom {
     position: absolute;
     top: 0px;

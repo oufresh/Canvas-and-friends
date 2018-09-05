@@ -14,17 +14,13 @@ function drawStyle(d)
     return "";
 }
 
-function getMousePos(evt) {
-    //console.log(svg._groups[0][0]);
-    var rect = svgElem.getBoundingClientRect();
-    //console.log(rect);
-    return {
-      x: evt.clientX - rect.left,
-      y: evt.clientY - rect.top
-    };
-  }
-  
-  var d3Transform = null;
+function getMousePos(evt, svgElem) {
+  const rect = svgElem.getBoundingClientRect();
+  return {
+    x: evt.clientX - rect.left,
+    y: evt.clientY - rect.top
+  };
+}
   
   function calcCoords(mx, my)
   {
@@ -37,28 +33,64 @@ function getMousePos(evt) {
     return [mx, my];
   }
 
+function createMarkup(drawings) {
+    return { __html: drawings};
+}
 
-class SvgZoom extends React.Component
+let oldTarget = null;
+function getTarget(e, cb)
+{
+  var target=e.target;
+  if(target!==oldTarget){
+      if (cb)
+        cb(target);
+      oldTarget=target;
+  }
+}
+
+function getActualTarget(event) {
+  var el = event.target || event.srcElement;
+  return el.nodeType == 1? el : el.parentNode;
+}
+
+
+class SvgZoom extends React.PureComponent
 {
     constructor(props)
     {
         super(props);
         this.svgRef = React.createRef();
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onDoubleClick = this.onDoubleClick.bind(this);
     }
 
     componentDidMount()
     {
     }
 
+
+
+    onMouseMove(e) {
+      const pos = getMousePos(e, this.svgRef.current);
+      if (this.props.onMouseMove) {
+        this.props.onMouseMove(pos);
+      }
+    }
+
+    onDoubleClick(e) {
+      console.log(getActualTarget(e));
+    }
+
     render()
     {
         const transform = null;
+        
         return(
-            <svg ref={this.svgRef} className={svgStyle.svgZoom}>
-                <g id="layer" transform={transform}>
-                    {this.props.drwaings}
-                </g>
+          <div className={svgStyle.svgZoomCont}>
+            <svg ref={this.svgRef} className={svgStyle.svgZoom} onMouseMove={this.onMouseMove} onDoubleClick={this.onDoubleClick} width={800} height={600}>
+                <g id="layer" transform={transform} dangerouslySetInnerHTML={createMarkup(this.props.drawings)} />
             </svg>
+          </div>
         );
     }
 }
