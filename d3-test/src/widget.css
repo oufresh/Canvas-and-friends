@@ -1,0 +1,19 @@
+.infos {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
+.infoRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    border-top: 1px solid grey;
+}
+
+.infoValue
+{
+    padding: 5;
+    width: 200px;
+    height: 32px;
+}

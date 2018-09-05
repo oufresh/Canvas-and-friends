@@ -2,6 +2,15 @@
     box-sizing: border-box;
 }
 
-#svg {
+body {
+    margin: 0px;
+}
+
+svg {
     border: 1px solid black;
+}
+
+h3 {
+    height: 40px;
+    margin-bottom: 25px;
 }

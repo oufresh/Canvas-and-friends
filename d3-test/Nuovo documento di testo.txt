@@ -1,0 +1,13 @@
+        this.svg.on("mousemove", () => {
+            //ok fa la mousemouve
+            //coordinate nel canvas svg
+            //console.log(event);
+            const coordinates = mouse(this.svgRef.current);
+            //console.log(coordinates);
+            //console.log(this.props.translate);
+            const coords = calcCoords(this.props.scale, this.props.translate, coordinates[0], coordinates[1]);
+            console.log(coords);
+            const el = event.target || event.srcElement;
+            const found = el.nodeType === 1? el : el.parentNode;
+            console.log(found);
+        });

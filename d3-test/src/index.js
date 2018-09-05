@@ -1,9 +1,6 @@
-import './index.css'; 
-import svg from './svg';
+import React from 'react';
+import {render} from 'react-dom';
+import App from './app';
+import './index.css';
 
-document.getElementById("app").innerHTML = `
-  <button id="reset">Reset</button>
-  <svg id="svg" width="960" height="500" />
-`;
-
-svg();
+render(<App/>, document.querySelector('#root'));
