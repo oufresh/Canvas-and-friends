@@ -78,7 +78,8 @@ class SvgZoom extends React.PureComponent
     }
 
     onDoubleClick(e) {
-      console.log(getActualTarget(e));
+      if (this.props.onDoubleClick)
+        this.props.onDoubleClick(getActualTarget(e));
     }
 
     render()
