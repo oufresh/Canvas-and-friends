@@ -1,5 +1,6 @@
 import React from 'react'
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
+import { event, select as d3Select } from 'd3-selection';
 import * as svgStyle from './SvgZoom.css';
 
 function drawStyle(d)
@@ -20,18 +21,23 @@ function getMousePos(evt, svgElem) {
     x: evt.clientX - rect.left,
     y: evt.clientY - rect.top
   };
+
+  
 }
   
-  function calcCoords(mx, my)
-  {
-    if (d3Transform) {
-      let cx = (mx - d3Transform.x) / d3Transform.k;
-      let cy = (my - d3Transform.y) / d3Transform.k;
-      return [cx, cy];
-    }
-  
-    return [mx, my];
+export function calcCoords(d3Transform, mx, my)
+{
+  console.log(d3Transform);
+  if (d3Transform) {
+    let cx = (mx - d3Transform.x) / d3Transform.k;
+    let cy = (my - d3Transform.y) / d3Transform.k;
+    return [cx, cy];
   }
+
+  return [mx, my];
+}
+
+export const initialTransform = zoomIdentity;
 
 function createMarkup(drawings) {
     return { __html: drawings};
@@ -53,22 +59,39 @@ function getActualTarget(event) {
   return el.nodeType == 1? el : el.parentNode;
 }
 
+function stringify(transform)
+{
+  return ''+transform;
+}
 
-class SvgZoom extends React.PureComponent
+
+export class SvgZoom extends React.Component
 {
     constructor(props)
     {
         super(props);
         this.svgRef = React.createRef();
+        this.zoom = null;
+        this.svg = null;
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onDoubleClick = this.onDoubleClick.bind(this);
+        this.onZoomed = this.onZoomed.bind(this);
+    }
+
+    onZoomed()
+    {
+      if (this.props.onZoomed)
+        this.props.onZoomed(event.transform);
     }
 
     componentDidMount()
     {
+      this.svg = d3Select(this.svgRef.current);
+
+      //se vogliamo gestire il click con d3 altrimenti mettiamo null e lo gestisce React
+      this.zoom = d3Zoom().on("zoom", this.onZoomed);
+      this.svg.call(this.zoom, zoomIdentity).on("dblclick.zoom", null);
     }
-
-
 
     onMouseMove(e) {
       const pos = getMousePos(e, this.svgRef.current);
@@ -84,7 +107,7 @@ class SvgZoom extends React.PureComponent
 
     render()
     {
-        const transform = null;
+        const transform = this.props.transform ? stringify(this.props.transform) : null;
         
         return(
           <div className={svgStyle.svgZoomCont}>
@@ -95,5 +118,3 @@ class SvgZoom extends React.PureComponent
         );
     }
 }
-
-export default SvgZoom;
