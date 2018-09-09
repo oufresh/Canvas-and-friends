@@ -2,6 +2,9 @@ import React from 'react'
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 import { event, select as d3Select } from 'd3-selection';
 import * as svgStyle from './SvgZoom.css';
+import { Rect } from '../shapes/Rect';
+import { Circle } from '../shapes/Circle';
+import { MyShape } from '../shapes/MyShape';
 
 function drawStyle(d)
 {
@@ -54,9 +57,24 @@ function getTarget(e, cb)
   }
 }
 
-function getActualTarget(event) {
+function filterTarget(element, filter)
+{
+  if (element.nodeType === 1 && element.id !== "svg") {
+    if (filter(element) === true)
+      return element;
+    else
+      return filterTarget(element.parentNode, filter);
+  }
+  else if (element.nodeType === 9)
+    return null;
+  else
+    return filterTarget(element.parentNode, filter);
+}
+
+function getActualTarget(event, filter) {
   var el = event.target || event.srcElement;
-  return el.nodeType == 1? el : el.parentNode;
+  const f = filter ? filter : () => true;
+  return filterTarget(el, f);
 }
 
 function stringify(transform)
@@ -102,17 +120,23 @@ export class SvgZoom extends React.Component
 
     onDoubleClick(e) {
       if (this.props.onDoubleClick)
-        this.props.onDoubleClick(getActualTarget(e));
+        this.props.onDoubleClick(getActualTarget(e, (e) => { 
+          return (e.data? (e.data.id !== undefined): false); 
+        }));
     }
 
     render()
     {
+        //<g id="layer" transform={transform} dangerouslySetInnerHTML={createMarkup(this.props.drawings)} />
         const transform = this.props.transform ? stringify(this.props.transform) : null;
         
         return(
           <div className={svgStyle.svgZoomCont}>
-            <svg ref={this.svgRef} className={svgStyle.svgZoom} onMouseMove={this.onMouseMove} onDoubleClick={this.onDoubleClick} width={800} height={600}>
-                <g id="layer" transform={transform} dangerouslySetInnerHTML={createMarkup(this.props.drawings)} />
+            <svg id={"svg"} ref={this.svgRef} className={svgStyle.svgZoom} onMouseMove={this.onMouseMove} onDoubleClick={this.onDoubleClick} width={800} height={600}>
+              <g id="layer" transform={transform}>
+                <MyShape />
+
+              </g>
             </svg>
           </div>
         );

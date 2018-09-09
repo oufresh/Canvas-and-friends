@@ -35,6 +35,7 @@ class App extends React.Component
 
     onDoubleClick(target)
     {
+        console.log(target.dataset.id);
         this.setState(ps => {
             return {
                 pos: ps.pos,
