@@ -11,7 +11,7 @@ export const MyShape = (props) => {
     const r = w / 2;
     const tx = r;
     return(
-        <ShapeGroup id="cane" data-id="pippo">
+        <ShapeGroup id="cane" dataId={"2"}>
             <ShapeGroup tx={tx}>
                 <Circle r={r} color={'rgb(0,125,0)'} />
             </ShapeGroup>

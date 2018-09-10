@@ -1,7 +1,7 @@
 import React from 'react';
 import {initialTransform, calcCoords, SvgZoom } from './zoom/SvgZoom';
 
-const drawings = '<rect width="100" height="200" x="50" y="110" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><rect width="50" height="60" x="100" y="150" style="fill:rgb(255,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><polygon points="100,10 40,198 190,78 10,78 160,198"style="fill:lime;stroke:purple;stroke-width:5;fill-rule:evenodd;" />';
+const drawings = '<rect width="100" height="200" x="50" y="110" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><rect width="50" height="60" x="100" y="150" style="fill:rgb(255,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><polygon data-id="2" points="100,10 40,198 190,78 10,78 160,198"style="fill:lime;stroke:purple;stroke-width:5;fill-rule:evenodd;" />';
 
 class App extends React.Component
 {
@@ -35,7 +35,7 @@ class App extends React.Component
 
     onDoubleClick(target)
     {
-        console.log(target.dataset.id);
+        //console.log(target.dataset.id);
         this.setState(ps => {
             return {
                 pos: ps.pos,

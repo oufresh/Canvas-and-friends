@@ -30,7 +30,7 @@ function getMousePos(evt, svgElem) {
   
 export function calcCoords(d3Transform, mx, my)
 {
-  console.log(d3Transform);
+  //console.log(d3Transform);
   if (d3Transform) {
     let cx = (mx - d3Transform.x) / d3Transform.k;
     let cy = (my - d3Transform.y) / d3Transform.k;
@@ -59,22 +59,26 @@ function getTarget(e, cb)
 
 function filterTarget(element, filter)
 {
-  if (element.nodeType === 1 && element.id !== "svg") {
+  //console.log(element);
+  if (element.id === "svg")
+    return null;
+  else if (element.nodeType === 1) {
     if (filter(element) === true)
       return element;
     else
       return filterTarget(element.parentNode, filter);
   }
-  else if (element.nodeType === 9)
+  else //if (element.nodeType === 9)
     return null;
-  else
-    return filterTarget(element.parentNode, filter);
+  //else
+  //  return filterTarget(element.parentNode, filter);
 }
 
 function getActualTarget(event, filter) {
   var el = event.target || event.srcElement;
   const f = filter ? filter : () => true;
-  return filterTarget(el, f);
+  const found = filterTarget(el, f);
+  return found;
 }
 
 function stringify(transform)
@@ -120,14 +124,25 @@ export class SvgZoom extends React.Component
 
     onDoubleClick(e) {
       if (this.props.onDoubleClick)
-        this.props.onDoubleClick(getActualTarget(e, (e) => { 
-          return (e.data? (e.data.id !== undefined): false); 
-        }));
+      {
+        const foundTarget = getActualTarget(e, (e) => { 
+          return (e ? (e.dataset ? (e.dataset.id === "2"): false) : false); 
+        });
+        if (foundTarget)
+          this.props.onDoubleClick(foundTarget);
+        else
+          this.props.onDoubleClick(null);
+      }
     }
 
+    /**
+     * <g id="layer" transform={transform} dangerouslySetInnerHTML={createMarkup(this.props.drawings)} />
+     
+     */
+    
     render()
     {
-        //<g id="layer" transform={transform} dangerouslySetInnerHTML={createMarkup(this.props.drawings)} />
+        
         const transform = this.props.transform ? stringify(this.props.transform) : null;
         
         return(
@@ -135,8 +150,7 @@ export class SvgZoom extends React.Component
             <svg id={"svg"} ref={this.svgRef} className={svgStyle.svgZoom} onMouseMove={this.onMouseMove} onDoubleClick={this.onDoubleClick} width={800} height={600}>
               <g id="layer" transform={transform}>
                 <MyShape />
-
-              </g>
+              </g>         
             </svg>
           </div>
         );
