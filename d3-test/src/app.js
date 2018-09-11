@@ -11,15 +11,25 @@ class App extends React.Component
 
         this.state = {
             pos: {
-                x: 0, y: 0
+                x:0,
+                y: 0
+            },
+            moveTo: {
+                tx: 400,
+                ty: 300,
+                scale: 1,
+                px: -200,
+                py: -100
             },
             target: null,
-            transform: initialTransform
+            transform: initialTransform,
+            viewPort: [800, 600]
         };
 
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onDoubleClick = this.onDoubleClick.bind(this);
         this.onZoomed = this.onZoomed.bind(this);
+        this.onDblClickZoom = this.onDblClickZoom.bind(this);
     }
 
     onMouseMove(pos)
@@ -28,7 +38,9 @@ class App extends React.Component
             return {
                 pos: pos,
                 target: ps.target,
-                transform: ps.transform
+                transform: ps.transform,
+                moveTo: ps.moveTo,
+                viewPort: ps.viewPort
             };
         });
     }
@@ -40,7 +52,9 @@ class App extends React.Component
             return {
                 pos: ps.pos,
                 target: target,
-                transform: ps.transform
+                transform: ps.transform,
+                moveTo: ps.moveTo,
+                viewPort: ps.viewPort
             };
         });
     }
@@ -51,7 +65,32 @@ class App extends React.Component
             return {
                 pos: ps.pos,
                 target: ps.target,
-                transform: transform
+                transform: transform,
+                moveTo: ps.moveTo,
+                viewPort: ps.viewPort
+            };
+        });
+    }
+
+    onDblClickZoom(mousePos) {
+        const coords =  calcCoords(this.state.transform, mousePos.x, mousePos.y);
+        console.log(mousePos);
+        console.log(coords);
+
+        this.setState(ps => {
+            const moveTo = {
+                scale: this.state.transform.k + 0.5,
+                tx: mousePos.x,
+                ty: mousePos.y,
+                px: -coords[0],
+                py: -coords[1]
+            };
+            return {
+                pos: ps.pos,
+                target: ps.target,
+                transform: ps.transform,
+                moveTo: moveTo,
+                viewPort: ps.viewPort
             };
         });
     }
@@ -62,7 +101,16 @@ class App extends React.Component
         return (
             <div>
                 <h3>D3 zoom test</h3>
-                <SvgZoom onMouseMove={this.onMouseMove} drawings={drawings} onDoubleClick={this.onDoubleClick} onZoomed={this.onZoomed} transform={this.state.transform} />
+                <SvgZoom 
+                    viewPort={this.state.viewPort}
+                    onMouseMove={this.onMouseMove}
+                    drawings={drawings}
+                    onDoubleClick={this.onDoubleClick}
+                    onZoomed={this.onZoomed}
+                    transform={this.state.transform}
+                    moveTo={this.state.moveTo}
+                    onDblClickZoom={this.onDblClickZoom}
+                />
                 <div>
                     <table>
                         <tbody>
