@@ -1,0 +1,8 @@
+### 00
+GET http://localhost:7080/schematica/rest/schematica/schemi/tile/ST/ST/REALE/TOPOLOGICO_MT/none/none/Monocromatico/52572/44016/2/8/1?id=none&infoDAL=none&codApp=none
+
+### 01
+GET http://localhost:7080/schematica/?dbSession=S867906698913278
+
+### 02
+GET http://localhost:7080/stweb-dr/rest/login/service/info
