@@ -1,0 +1,18 @@
+{
+  "name": "d3-tile-srv",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "oufresh",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "pngjs": "^3.3.3",
+    "reload": "^2.3.0"
+  }
+}

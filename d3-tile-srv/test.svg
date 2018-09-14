@@ -1,0 +1,9 @@
+<svg width="1024" height="512" xmlns="http://www.w3.org/2000/svg">
+<g>
+	  <rect fill="#DDD" id="canvas_background" height="512" width="1024" y="0" x="0"/>
+</g>
+ <g transform="translate(256 256)">
+  <title>Obj</title>
+  <rect stroke="#000" id="svg_1" height="256" width="256" y="0" x="0" stroke-width="1" fill="#B33"/>
+ </g>
+</svg>
