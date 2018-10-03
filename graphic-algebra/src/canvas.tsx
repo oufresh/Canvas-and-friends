@@ -3,16 +3,18 @@ import * as matrix from './matrix';
 //import * as glMatrix from 'gl-matrix';
 import { Fragment } from 'react';
 import { CPos, getCanvasPos, getMousePos } from './canvasUtils';
+import { Polyline } from './polyline'
 
 export type CanvasProps = {
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
 };
 
 declare type CanvasState = {
     translate: boolean;
     rotate: boolean;
     mousePos: CPos;
+    polylines: Array<Polyline>
 };
 
 class Canvas extends React.Component<CanvasProps, CanvasState>
@@ -32,7 +34,8 @@ class Canvas extends React.Component<CanvasProps, CanvasState>
             mousePos: {
                 x: 0, 
                 y: 0
-            }
+            },
+            polylines: []
         }
     }
 
@@ -44,7 +47,6 @@ class Canvas extends React.Component<CanvasProps, CanvasState>
 
     componentDidUpdate(prevProps: CanvasProps)
     {
-        matrix.TestTranslate((av) => {
             this.cContext.clearRect(0, 0, 640, 480);
             this.cContext.fillStyle = "rgb(200,0,0)";  
             this.cContext.beginPath();
@@ -52,7 +54,6 @@ class Canvas extends React.Component<CanvasProps, CanvasState>
             this.cContext.lineTo(av[1][0], av[1][1]);
             this.cContext.lineTo(av[2][0], av[2][1]);
             this.cContext.fill();
-        })
     }
 
     onTranslate = () => {
@@ -71,6 +72,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState>
     }
 
     onMouseMove = (e: any) => {
+        console.log(e.region);
         const pos = getMousePos(this.canvasPos, e);
         console.log(pos);
         this.setState((ps: CanvasState) => {
@@ -79,7 +81,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState>
                 rotate: ps.rotate,
                 translate: ps.translate
             };
-        })
+        });
     }
 
     render()
