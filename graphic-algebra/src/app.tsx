@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { appContainer } from './app.css';
-import Canvas from './canvas';
+import { Canvas } from './canvas/Canvas';
 
 class App extends React.Component
 {
@@ -19,4 +19,4 @@ class App extends React.Component
     }
 }
 
-export default App;
+export { App };

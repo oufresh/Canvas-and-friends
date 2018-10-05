@@ -15,7 +15,7 @@ export function getCanvasPos(canvas?: HTMLCanvasElement): CPos {
     return {
         x, y
     };
-};
+}
 
 export function getMousePos(canvasPos: CPos, e: MouseEvent): CPos {
     var mouseX = e.clientX - canvasPos.x + window.pageXOffset;
@@ -24,7 +24,7 @@ export function getMousePos(canvasPos: CPos, e: MouseEvent): CPos {
         x : mouseX,
         y : mouseY
     };
-};
+}
 
 /*
 BitmapData.prototype.touchPos = function(e) {
