@@ -25,8 +25,8 @@ declare type CanvasState = {
 };
 
 const defaultViewPort: ViewPort = {
-    width: 640,
-    height: 480
+    width: 800,
+    height: 600
 };
 
 class Canvas extends React.Component<CanvasProps, CanvasState> {
@@ -68,8 +68,20 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         });
     }
 
+    drawPoint(p: Point) {
+        const oldStyle = this.cContext.strokeStyle;
+        this.cContext.strokeStyle = 'red';
+        this.cContext.beginPath();
+        this.cContext.moveTo(p.x - 3, p.y);
+        this.cContext.lineTo(p.x + 3, p.y);
+        this.cContext.moveTo(p.x, p.y - 3);
+        this.cContext.lineTo(p.x, p.y + 3);
+        this.cContext.stroke();
+        this.cContext.strokeStyle = oldStyle;
+    }
+
     componentDidUpdate(prevProps: CanvasProps) {
-        this.cContext.clearRect(0, 0, 640, 480);
+        this.cContext.clearRect(0, 0, this.state.viewPort.width, this.state.viewPort.height);
 
         const ep = new ExpPoint(200, 200, 10);
         const strokeStyle = /*p.hit(this.state.mousePos.x, this.state.mousePos.y) === true ? "red" : */'black';
@@ -84,39 +96,17 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
             if (line instanceof ExpLine) {
                 const eLine = line as ExpLine;
-                this.cContext.fillRect(eLine.expVertex[0].x, eLine.expVertex[0].y, 1, 1); // fill in the pixel at (10,10)  
+                eLine.expVertex.forEach((v: Point, i: number) => {
+                    this.drawPoint(v);
+                });
+                 // fill in the pixel at (10,10)  
                 //this.cContext.fillRect(eLine.expVertex[1].x, eLine.expVertex[1].y, 1, 1); // fill in the pixel at (10,10)  
             }
         });
-
-        // this.cContext.fillRect(ep.x, ep.y, 1, 1); // fill in the pixel at (10,10)
-        // this.cContext.fillRect(ep.p1.x, ep.p1.y, 1, 1); // fill in the pixel at (10,10)
-        // this.cContext.fillRect(ep.p2.x, ep.p2.y, 1, 1); // fill in the pixel at (10,10)
-
-            /*this.cContext.clearRect(0, 0, 640, 480);
-            this.cContext.fillStyle = "rgb(200,0,0)";
-            this.cContext.beginPath();
-            this.cContext.moveTo(av[0][0], av[0][1]);
-            this.cContext.lineTo(av[1][0], av[1][1]);
-            this.cContext.lineTo(av[2][0], av[2][1]);
-            this.cContext.fill();*/
-        /*this.state.polylines.map((pol: Polyline) => {
-
-            this.cContext.lineWidth = 4;
-            this.cContext.beginPath();
-            pol.points.forEach((p: Point, i: number) => {
-                if (i === 0)
-                    this.cContext.moveTo(p.x, p.y);
-                else
-                    this.cContext.lineTo(p.x, p.y);
-            });
-            this.cContext.closePath();
-            this.cContext.stroke();
-        });*/
-        
     }
 
     onTranslate = () => {
+        
         this.setState((prevState: CanvasState) => {
             const translate = !prevState.translate;
             return {
@@ -133,10 +123,10 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
     onMouseMove = (e: any) => {
         const pos = getMousePos(this.canvasPos, e);
-        if (e.nativeEvent.region) {
+        /*if (e.nativeEvent.region) {
             console.log(e.nativeEvent.region);
             alert(e.nativeEvent.region);
-        }
+        }*/
         this.setState({ mousePos: pos});
     }
 
@@ -165,7 +155,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                     <button onClick={this.onAddPoint}>Add</button>
                 </div>
                 <div style={{border: '1px solid grey'}}>
-                    <canvas ref={this.cRef} width={640} height={480} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}/>
+                    <canvas ref={this.cRef} width={this.state.viewPort.width} height={this.state.viewPort.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}/>
                 </div>
             </Fragment>
         );
