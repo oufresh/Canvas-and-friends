@@ -4,14 +4,17 @@
   "description": "Graphic algebra with canvas for rendering",
   "main": "src/index.html",
   "scripts": {
-    "start": "parcel src/index.html --open --no-cache",
-    "build": "parcel build src/index.html --no-cache"
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject"
   },
   "dependencies": {
     "gl-matrix": "^2.8.1",
     "mathjs": "^5.2.2",
     "react": "^16.6.0",
-    "react-dom": "^16.6.0"
+    "react-dom": "^16.6.0",
+    "react-scripts-ts": "2.13.0"
   },
   "devDependencies": {
     "@types/gl-matrix": "^2.4.4",
@@ -19,14 +22,6 @@
     "@types/mathjs": "^4.4.1",
     "@types/react": "^16.4.18",
     "@types/react-dom": "^16.0.9",
-    "autoprefixer": "^9.3.1",
-    "jest": "^23.6.0",
-    "parcel-bundler": "^1.10.3",
-    "parcel-plugin-clean-dist": "0.0.6",
-    "parcel-plugin-typescript": "^1.0.0",
-    "postcss-modules": "^1.4.1",
-    "test": "jest",
-    "ts-jest": "^23.10.4",
     "typescript": "^3.1.3"
   }
 }
