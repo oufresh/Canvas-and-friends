@@ -30,7 +30,7 @@ const defaultViewPort: ViewPort = {
 };
 
 class Canvas extends React.Component<CanvasProps, CanvasState> {
-    cRef: any;
+    cRef: React.RefObject<HTMLCanvasElement>;
     cContext: CanvasRenderingContext2D;
     state: CanvasState;
     canvasPos: CPos;
