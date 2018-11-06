@@ -1,3 +1,3 @@
 import * as MathJs from 'mathjs';
 
-export const identity = []
+export const identity = [];

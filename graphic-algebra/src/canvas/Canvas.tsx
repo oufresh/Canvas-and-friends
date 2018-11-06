@@ -5,10 +5,10 @@ import { Polyline } from '../polyline';
 import { Line, ExpLine } from '../line';
 import { Point, ExpPoint } from '../point';
 
-export type CanvasProps = {
+interface CanvasProps {
     width?: number;
     height?: number;
-};
+}
 
 declare type ViewPort = {
     width: number;
@@ -83,7 +83,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
     componentDidUpdate(prevProps: CanvasProps) {
         this.cContext.clearRect(0, 0, this.state.viewPort.width, this.state.viewPort.height);
 
-        const ep = new ExpPoint(200, 200, 10);
+        // const ep = new ExpPoint(200, 200, 10);
         const strokeStyle = /*p.hit(this.state.mousePos.x, this.state.mousePos.y) === true ? "red" : */'black';
         // console.log(strokeStyle);
         this.cContext.strokeStyle = strokeStyle;
@@ -100,7 +100,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                     this.drawPoint(v);
                 });
                  // fill in the pixel at (10,10)  
-                //this.cContext.fillRect(eLine.expVertex[1].x, eLine.expVertex[1].y, 1, 1); // fill in the pixel at (10,10)  
+                // this.cContext.fillRect(eLine.expVertex[1].x, eLine.expVertex[1].y, 1, 1); // fill in the pixel at (10,10)  
             }
         });
     }
@@ -118,7 +118,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
     }
 
     onRotate = () => {
-
+        console.log('rotate');
     }
 
     onMouseMove = (e: any) => {
@@ -131,7 +131,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
     }
 
     onMouseclick = (e: any) => {
-
+        console.log('click');
     }
 
     onAddPoint = () => {
@@ -142,8 +142,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         });*/
     }
 
-    render()
-    {
+    render() {
         const { mousePos } = this.state;
         return (
             <Fragment>

@@ -14,7 +14,6 @@ import { Point } from '../point';
 export class Polyline {
     points: Array<Point>;
 
-    
     constructor(start: Point, end: Point) {
         this.points = [];
         this.points.push(start);
@@ -35,29 +34,27 @@ export class Polyline {
     addPoint(point: Point, index?: number): void {
         if (index !== undefined) {
             this.points.splice(index, 0, point);
-        }
-        else
+        } else {
             this.points.push(point);
+        }
     }
 
-    isBeetween(A: Point, B: Point, C: Point): boolean
-    {
+    isBeetween(A: Point, B: Point, C: Point): boolean {
         // if AC is horizontal
-        if (A.x == C.x) return B.x == C.x;
+        if (A.x === C.x) { return B.x === C.x; }
         // if AC is vertical.
-        if (A.y == C.y) return B.y == C.y;
-        // match the gradients
+        if (A.y === C.y) { return B.y === C.y; }
+        // match the gradients  
         const k = (B.y - A.y) / (B.x - A.x);
         const b = A.y - A.x * k;
         const Y = C.x * k + b;
         return Math.round(Y) === C.y;
     }
 
-    hit(x: number, y: number): boolean
-    {
+    hit(x: number, y: number): boolean {
         let hit = false;
-        for (let i = 0; i < (this.points.length -1); i++) {
-            const isb = this.isBeetween(this.points[i], this.points[i+1], new Point(x, y));
+        for (let i = 0; i < (this.points.length - 1); i++) {
+            const isb = this.isBeetween(this.points[i], this.points[i + 1], new Point(x, y));
             hit = hit || isb;
         }
 

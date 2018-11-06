@@ -1,7 +1,7 @@
 import React from 'react';
-import {initialTransform, calcCoords, SvgZoom } from './zoom/SvgZoom';
+import { Zoom } from './zoom/components/Zoom';
 
-const drawings = '<rect width="100" height="200" x="50" y="110" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><rect width="50" height="60" x="100" y="150" style="fill:rgb(255,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><polygon data-id="2" points="100,10 40,198 190,78 10,78 160,198"style="fill:lime;stroke:purple;stroke-width:5;fill-rule:evenodd;" />';
+//const drawings = '<rect width="100" height="200" x="50" y="110" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><rect width="50" height="60" x="100" y="150" style="fill:rgb(255,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><polygon data-id="2" points="100,10 40,198 190,78 10,78 160,198"style="fill:lime;stroke:purple;stroke-width:5;fill-rule:evenodd;" />';
 
 class App extends React.Component
 {
@@ -22,14 +22,14 @@ class App extends React.Component
                 py: -100
             },
             target: null,
-            transform: initialTransform,
+            //transform: initialTransform,
             viewPort: [800, 600]
         };
 
         this.onMouseMove = this.onMouseMove.bind(this);
         this.onDoubleClick = this.onDoubleClick.bind(this);
-        this.onZoomed = this.onZoomed.bind(this);
         this.onDblClickZoom = this.onDblClickZoom.bind(this);
+        this.onZoomed = this.onZoomed.bind(this);
     }
 
     onMouseMove(pos)
@@ -73,7 +73,7 @@ class App extends React.Component
     }
 
     onDblClickZoom(mousePos) {
-        const coords =  calcCoords(this.state.transform, mousePos.x, mousePos.y);
+        const coords = [0,0];// calcCoords(this.state.transform, mousePos.x, mousePos.y);
         console.log(mousePos);
         console.log(coords);
 
@@ -97,19 +97,12 @@ class App extends React.Component
 
     render()
     {
-        const coords = calcCoords(this.state.transform, this.state.pos.x, this.state.pos.y);
+        const coords = [0,0]; //calcCoords(this.state.transform, this.state.pos.x, this.state.pos.y);
         return (
             <div>
                 <h3>D3 zoom test</h3>
-                <SvgZoom 
+                <Zoom 
                     viewPort={this.state.viewPort}
-                    onMouseMove={this.onMouseMove}
-                    drawings={drawings}
-                    onDoubleClick={this.onDoubleClick}
-                    onZoomed={this.onZoomed}
-                    transform={this.state.transform}
-                    moveTo={this.state.moveTo}
-                    onDblClickZoom={this.onDblClickZoom}
                 />
                 <div>
                     <table>

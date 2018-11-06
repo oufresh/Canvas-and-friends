@@ -1,2 +1,2 @@
-export * from './canvas';
+export * from './Canvas';
 export * from './canvasUtils';
