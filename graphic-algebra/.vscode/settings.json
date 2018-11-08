@@ -8,5 +8,7 @@
         "**/.cache": true,
         "**/node_modules": true
     },
-    "typescript.tsdk": "node_modules\\typescript\\lib"
+    "typescript.tsdk": "node_modules\\typescript\\lib",
+    "mdmath.delimiters": "dollars",
+    "svg.preview.background": "transparent"
 }

@@ -4,6 +4,7 @@ import { CPos, getCanvasPos, getMousePos } from './canvasUtils';
 import { Polyline } from '../polyline';
 import { Line, ExpLine } from '../line';
 import { Point, ExpPoint } from '../point';
+import { circleInLine } from '../collisions/circleOnLine';
 
 interface CanvasProps {
     width?: number;
@@ -21,7 +22,8 @@ declare type CanvasState = {
     mousePos: CPos;
     polylines: Array<Polyline>;
     lines: Array<Line>;
-    viewPort: ViewPort
+    viewPort: ViewPort;
+    points: Array<Point>;
 };
 
 const defaultViewPort: ViewPort = {
@@ -31,7 +33,7 @@ const defaultViewPort: ViewPort = {
 
 class Canvas extends React.Component<CanvasProps, CanvasState> {
     cRef: React.RefObject<HTMLCanvasElement>;
-    cContext: CanvasRenderingContext2D;
+    cContext: CanvasRenderingContext2D | null;
     state: CanvasState;
     canvasPos: CPos;
 
@@ -50,59 +52,78 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                 y: 0
             },
             polylines: [],
-            lines: []
+            lines: [],
+            points: []
         };
 
     }
 
     componentDidMount() {
-        this.cContext = this.cRef.current.getContext('2d');
+        this.cContext = this.cRef.current ? this.cRef.current.getContext('2d') : null;
         this.canvasPos = getCanvasPos(this.cRef.current);
-        this.cContext.clearRect(0, 0, this.state.viewPort.width, this.state.viewPort.height);
+        if (this.cContext) {
+            this.cContext.clearRect(0, 0, this.state.viewPort.width, this.state.viewPort.height);
+        }
         
         const line = new ExpLine(new Point(100, 100), new Point(300, 500), 10);
         /*const pol = new Polyline(new Point(10,10), new Point(150,110));
         pol.addPoint(new Point(100, 100), 1);*/
+        const point = new Point(200, 200);
         this.setState({
-            lines: [line]
+            lines: [line],
+            points: [point]
         });
     }
 
     drawPoint(p: Point) {
-        const oldStyle = this.cContext.strokeStyle;
-        this.cContext.strokeStyle = 'red';
-        this.cContext.beginPath();
-        this.cContext.moveTo(p.x - 3, p.y);
-        this.cContext.lineTo(p.x + 3, p.y);
-        this.cContext.moveTo(p.x, p.y - 3);
-        this.cContext.lineTo(p.x, p.y + 3);
-        this.cContext.stroke();
-        this.cContext.strokeStyle = oldStyle;
+        if (this.cContext) {
+            const oldStyle = this.cContext.strokeStyle;
+            this.cContext.strokeStyle = 'red';
+            this.cContext.beginPath();
+            this.cContext.moveTo(p.x - 3, p.y);
+            this.cContext.lineTo(p.x + 3, p.y);
+            this.cContext.moveTo(p.x, p.y - 3);
+            this.cContext.lineTo(p.x, p.y + 3);
+            this.cContext.stroke();
+            this.cContext.strokeStyle = oldStyle;
+        }
     }
 
     componentDidUpdate(prevProps: CanvasProps) {
-        this.cContext.clearRect(0, 0, this.state.viewPort.width, this.state.viewPort.height);
+        if (this.cContext) {
+            this.cContext.clearRect(0, 0, this.state.viewPort.width, this.state.viewPort.height);
 
-        // const ep = new ExpPoint(200, 200, 10);
-        const strokeStyle = /*p.hit(this.state.mousePos.x, this.state.mousePos.y) === true ? "red" : */'black';
-        // console.log(strokeStyle);
-        this.cContext.strokeStyle = strokeStyle;
+            // const ep = new ExpPoint(200, 200, 10);
+            const strokeStyle = /*p.hit(this.state.mousePos.x, this.state.mousePos.y) === true ? "red" : */'black';
+            // console.log(strokeStyle);
+            this.cContext.strokeStyle = strokeStyle;
 
-        this.state.lines.forEach((line: Line) => {
-            this.cContext.beginPath();
-            this.cContext.moveTo(line.vertex[0].x, line.vertex[0].y);
-            this.cContext.lineTo(line.vertex[1].x, line.vertex[1].y);
-            this.cContext.stroke();
+            this.state.lines.forEach((line: Line) => {
+                if (this.cContext) {
+                    this.cContext.beginPath();
+                    this.cContext.moveTo(line.vertex[0].x, line.vertex[0].y);
+                    this.cContext.lineTo(line.vertex[1].x, line.vertex[1].y);
+                    this.cContext.stroke();
+                }
 
-            if (line instanceof ExpLine) {
-                const eLine = line as ExpLine;
-                eLine.expVertex.forEach((v: Point, i: number) => {
-                    this.drawPoint(v);
-                });
-                 // fill in the pixel at (10,10)  
-                // this.cContext.fillRect(eLine.expVertex[1].x, eLine.expVertex[1].y, 1, 1); // fill in the pixel at (10,10)  
-            }
-        });
+                /*if (line instanceof ExpLine) {
+                    const eLine = line as ExpLine;
+                    eLine.expVertex.forEach((v: Point, i: number) => {
+                        this.drawPoint(v);
+                    });
+                    // fill in the pixel at (10,10)  
+                    // this.cContext.fillRect(eLine.expVertex[1].x, eLine.expVertex[1].y, 1, 1); // fill in the pixel at (10,10)  
+                }*/
+            });
+
+            this.state.points.forEach((point: Point) => {
+                this.drawPoint(point);
+                const line = this.state.lines[0];
+                const collision = circleInLine(line.vertex[0].x, line.vertex[0].y, line.vertex[1].x, line.vertex[1].y, point.x, point.y, 10);
+                console.log(collision);
+                this.drawPoint(new Point(collision.x, collision.y));
+            });
+        }
     }
 
     onTranslate = () => {

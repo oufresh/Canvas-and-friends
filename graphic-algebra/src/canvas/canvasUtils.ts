@@ -4,7 +4,7 @@ export type CPos = {
     y: number
 };
 
-export function getCanvasPos(canvas?: HTMLCanvasElement): CPos {
+export function getCanvasPos(canvas: HTMLCanvasElement | null): CPos {
     let x = 0;
     let y = 0;
     if (canvas) {
