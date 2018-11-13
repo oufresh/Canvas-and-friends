@@ -39,7 +39,7 @@ export function circleInLine(x1: number, y1: number, x2: number, y2: number, cx:
     const closestX = x1 + (dot * (x2 - x1));
     const closestY = y1 + (dot * (y2 - y1));
 
-    const  onSegment = pointInLine(x1, y1, x2, y2, closestX, closestY);
+    const onSegment = pointInLine(x1, y1, x2, y2, closestX, closestY);
     if (!onSegment) {
         return {
             hit: false,
