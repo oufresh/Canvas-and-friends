@@ -1,0 +1,16 @@
+<svg width="800" height="600">
+    <g>
+        <line x1="100" y1="100" x2="400" y2="100" style="stroke:rgb(100,100,100);stroke-width:2;stroke-dasharray:1" />
+        <line x1="100" y1="100" x2="100" y2="400" style="stroke:rgb(100,100,100);stroke-width:2;stroke-dasharray:1" />
+        <line x1="100" y1="100" x2="150" y2="300" style="stroke:rgb(0,0,255);stroke-width:2;stroke-dasharray:1" />
+        <line x1="100" y1="100" x2="400" y2="400" style="stroke:rgb(255,0,0);stroke-width:3" />
+        <circle cx="100" cy="100" r="4" fill="rgba(0,0,0,0.9)"/>
+        <circle cx="400" cy="400" r="4" fill="rgba(0,0,0,0.9)"/>
+        <circle cx="150" cy="300" r="4" fill="rgba(0,0,0,0.9)"/>
+        <line x1="100" y1="100" x2="150" y2="300" style="stroke:rgb(0,0,255);stroke-width:2" />
+        <line x1="150" y1="300" x2="400" y2="400" style="stroke:rgb(0,0,255);stroke-width:2" />
+        <text x="104" y="99" style="font-weight: bold">P1</text>
+        <text x="404" y="412" style="font-weight: bold">P2</text>
+        <text x="151" y="312" style="font-weight: bold">C</text>
+    </g>
+</svg>

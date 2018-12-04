@@ -5,6 +5,8 @@ import { Polyline } from '../polyline';
 import { Line, ExpLine } from '../line';
 import { Point, ExpPoint } from '../point';
 import { circleInLine } from '../collisions/circleOnLine';
+import { Polygon } from '../shapes/polygon';
+import { pointInPolygon } from '../collisions/pointInPolygon';
 
 interface CanvasProps {
     width?: number;
@@ -24,6 +26,7 @@ declare type CanvasState = {
     lines: Array<Line>;
     viewPort: ViewPort;
     points: Array<Point>;
+    polygons: Array<Polygon>;
 };
 
 const defaultViewPort: ViewPort = {
@@ -53,7 +56,8 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
             },
             polylines: [],
             lines: [],
-            points: []
+            points: [],
+            polygons: []
         };
 
     }
@@ -68,10 +72,19 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         const line = new ExpLine(new Point(100, 100), new Point(300, 500), 10);
         /*const pol = new Polyline(new Point(10,10), new Point(150,110));
         pol.addPoint(new Point(100, 100), 1);*/
-        /// const point = new Point(200, 200);
+        const point = new Point(200, 200);
+
+        const pol = new Polygon();
+        pol.pushVertex([50, 50]);
+        pol.pushVertex([150, 100]);
+        pol.pushVertex([185, 150]);
+        pol.pushVertex([90, 140]);
+        pol.pushVertex([50, 140]);
+
         this.setState({
             lines: [line],
-            points: []
+            points: [point],
+            polygons: [pol]
         });
     }
 
@@ -97,6 +110,30 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
             this.cContext.stroke();
             this.cContext.strokeStyle = oldStyle;
         }
+    }
+    
+    drawPolygon = (ctx: CanvasRenderingContext2D, pol: Polygon, hit ?: boolean): void => {
+        // fare unca calc style partendo dallo stato del polygon se ha over o
+        // altri effetti
+        const oldStrokeStyle = ctx.strokeStyle;
+        const oldFillStyle = ctx.fillStyle;
+        ctx.fillStyle = hit ? 'rgba(200,0,200,1)' : 'rgba(200,0,200,0.3)';
+        ctx.strokeStyle = 'rgba(100,0,100,1)';
+        ctx.beginPath();
+        pol.vertices.forEach((p: Array<number>, index: number) => {
+            if (index === 0) {
+                ctx.moveTo(p[0], p[1]);
+            } else if (index === pol.vertices.length - 1) {
+                ctx.lineTo(p[0], p[1]);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.lineTo(p[0], p[1]);
+            }
+        });
+        ctx.fillStyle = oldFillStyle;
+        ctx.strokeStyle = oldStrokeStyle;
     }
 
     componentDidUpdate(prevProps: CanvasProps) {
@@ -133,6 +170,13 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                 console.log(collision);
                 this.drawPoint(new Point(collision.x, collision.y));
                 this.drawCircle(point, 10);
+            });
+
+            this.state.polygons.forEach((pol: Polygon) => {
+                if (this.cContext) {
+                    const hit = pointInPolygon(pol.vertices, this.state.mousePos.x, this.state.mousePos.y);
+                    this.drawPolygon(this.cContext, pol, hit);
+                }
             });
         }
     }

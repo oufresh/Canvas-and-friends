@@ -1,5 +1,3 @@
-// teorema di Jordan
-
 // POLYGON/POINT
 export function pointInPolugon(vertices: Array<Array<number>>, px: number, py: number) {
     let collision: boolean = false;
