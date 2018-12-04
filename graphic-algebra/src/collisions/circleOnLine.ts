@@ -6,6 +6,7 @@ export interface CollisionPoint {
     hit: boolean;
     x?: number;
     y?: number;
+    onSegment: boolean;
 }
 
 export function circleInLine(x1: number, y1: number, x2: number, y2: number, cx: number, cy: number, r: number) {
@@ -14,6 +15,7 @@ export function circleInLine(x1: number, y1: number, x2: number, y2: number, cx:
     const inside1 = pointInCircle(x1, y1, cx, cy, r);
     if (inside1) {
         return {
+            onSegment: true,
             hit: true,
             x: x1,
             y: y1
@@ -22,6 +24,7 @@ export function circleInLine(x1: number, y1: number, x2: number, y2: number, cx:
     const inside2 = pointInCircle(x2, y2, cx, cy, r);
     if (inside2) {
         return {
+            onSegment: true,
             hit: true,
             x: x2,
             y: y2
@@ -42,6 +45,7 @@ export function circleInLine(x1: number, y1: number, x2: number, y2: number, cx:
     const onSegment = pointInLine(x1, y1, x2, y2, closestX, closestY);
     if (!onSegment) {
         return {
+            onSegment: false,
             hit: false,
             x: closestX,
             y: closestY
@@ -54,6 +58,7 @@ export function circleInLine(x1: number, y1: number, x2: number, y2: number, cx:
     if (distance <= r) {
         return {
             hit: true,
+            onSegment: true,
             x: closestX,
             y: closestY
         };
@@ -61,6 +66,7 @@ export function circleInLine(x1: number, y1: number, x2: number, y2: number, cx:
 
     return {
         hit: false,
+        onSegment: true,
         x: closestX,
         y: closestY
     };

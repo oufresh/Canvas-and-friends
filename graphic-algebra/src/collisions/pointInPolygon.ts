@@ -1,5 +1,5 @@
 // POLYGON/POINT
-export function pointInPolugon(vertices: Array<Array<number>>, px: number, py: number) {
+export function pointInPolygon(vertices: Array<Array<number>>, px: number, py: number) {
     let collision: boolean = false;
   
     // go through each of the vertices, plus
