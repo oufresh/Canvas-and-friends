@@ -68,10 +68,10 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         const line = new ExpLine(new Point(100, 100), new Point(300, 500), 10);
         /*const pol = new Polyline(new Point(10,10), new Point(150,110));
         pol.addPoint(new Point(100, 100), 1);*/
-        const point = new Point(200, 200);
+        /// const point = new Point(200, 200);
         this.setState({
             lines: [line],
-            points: [point]
+            points: []
         });
     }
 
@@ -84,6 +84,16 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
             this.cContext.lineTo(p.x + 3, p.y);
             this.cContext.moveTo(p.x, p.y - 3);
             this.cContext.lineTo(p.x, p.y + 3);
+            this.cContext.stroke();
+            this.cContext.strokeStyle = oldStyle;
+        }
+    }
+
+    drawCircle(c: Point, r: number) {
+        if (this.cContext) {
+            const oldStyle = this.cContext.strokeStyle;
+            this.cContext.strokeStyle = 'blue';
+            this.cContext.arc(c.x, c.y, r, 0, 2 * Math.PI, false);
             this.cContext.stroke();
             this.cContext.strokeStyle = oldStyle;
         }
@@ -122,6 +132,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                 const collision = circleInLine(line.vertex[0].x, line.vertex[0].y, line.vertex[1].x, line.vertex[1].y, point.x, point.y, 10);
                 console.log(collision);
                 this.drawPoint(new Point(collision.x, collision.y));
+                this.drawCircle(point, 10);
             });
         }
     }
