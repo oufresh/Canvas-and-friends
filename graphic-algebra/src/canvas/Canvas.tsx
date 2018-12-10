@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Fragment } from 'react';
 import { CPos, getCanvasPos, getMousePos } from './canvasUtils';
 import { Polyline } from '../polyline';
 import { Line, ExpLine } from '../line';
@@ -9,15 +8,15 @@ import { Polygon } from '../shapes/polygon';
 import { pointInPolygon } from '../collisions/pointInPolygon';
 import * as Shape2Draw from './shape2Draw';
 
-interface CanvasProps {
-    width?: number;
-    height?: number;
+export interface OnMouseMoveFunc {
+    (pos: CPos): any;
 }
 
-declare type ViewPort = {
+export interface CanvasProps {
     width: number;
     height: number;
-};
+    onMouseMove?: OnMouseMoveFunc;
+}
 
 declare type CanvasState = {
     translate: boolean;
@@ -25,14 +24,8 @@ declare type CanvasState = {
     mousePos: CPos;
     polylines: Array<Polyline>;
     lines: Array<Line>;
-    viewPort: ViewPort;
     points: Array<Point>;
     polygons: Array<Polygon>;
-};
-
-const defaultViewPort: ViewPort = {
-    width: 800,
-    height: 600
 };
 
 class Canvas extends React.Component<CanvasProps, CanvasState> {
@@ -45,10 +38,6 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         super(props);
         this.cRef = React.createRef();
         this.state = {
-            viewPort: {
-                width: props.width ? props.width : defaultViewPort.width,
-                height: props.height ? props.height : defaultViewPort.height
-            },
             translate: false,
             rotate: false,
             mousePos: {
@@ -67,7 +56,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         this.cContext = this.cRef.current ? this.cRef.current.getContext('2d') : null;
         this.canvasPos = getCanvasPos(this.cRef.current);
         if (this.cContext) {
-            this.cContext.clearRect(0, 0, this.state.viewPort.width, this.state.viewPort.height);
+            this.cContext.clearRect(0, 0, this.props.width, this.props.height);
         }
         
         const line = new ExpLine(new Point(100, 100), new Point(300, 500), 10);
@@ -91,7 +80,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
     componentDidUpdate(prevProps: CanvasProps) {
         if (this.cContext) {
-            this.cContext.clearRect(0, 0, this.state.viewPort.width, this.state.viewPort.height);
+            this.cContext.clearRect(0, 0, this.props.width, this.props.height);
 
             // const ep = new ExpPoint(200, 200, 10);
             const strokeStyle = /*p.hit(this.state.mousePos.x, this.state.mousePos.y) === true ? "red" : */'black';
@@ -134,30 +123,12 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
             });
         }
     }
-
-    onTranslate = () => {
-        
-        this.setState((prevState: CanvasState) => {
-            const translate = !prevState.translate;
-            return {
-                mousePos: prevState.mousePos,
-                rotate: prevState.rotate,
-                translate: translate
-            };
-        });
-    }
-
-    onRotate = () => {
-        console.log('rotate');
-    }
-
     onMouseMove = (e: any) => {
         const pos = getMousePos(this.canvasPos, e);
-        /*if (e.nativeEvent.region) {
-            console.log(e.nativeEvent.region);
-            alert(e.nativeEvent.region);
-        }*/
-        this.setState({ mousePos: pos});
+        this.setState({ mousePos: pos });
+        if (this.props.onMouseMove) {
+            this.props.onMouseMove(pos);
+        }
     }
 
     onMouseclick = (e: any) => {
@@ -167,29 +138,9 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         });
     }
 
-    onAddPoint = () => {
-        /*const p = this.state.polylines[0];
-        p.addPoint(new Point(100, 100), 1);
-        this.setState({
-            polylines: [p]
-        });*/
-    }
-
     render() {
-        const { mousePos } = this.state;
         return (
-            <Fragment>
-                <div>
-                    <button onClick={this.onTranslate}>Translate</button>
-                    <button>Rotate</button>
-                    <span>X:</span><span>{mousePos.x}</span>
-                    <span>Y:</span><span>{mousePos.y}</span>
-                    <button onClick={this.onAddPoint}>Add</button>
-                </div>
-                <div style={{border: '1px solid grey'}}>
-                    <canvas ref={this.cRef} width={this.state.viewPort.width} height={this.state.viewPort.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}/>
-                </div>
-            </Fragment>
+            <canvas ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}/>
         );
     }
 }
