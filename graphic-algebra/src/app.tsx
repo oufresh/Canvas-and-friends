@@ -2,6 +2,7 @@ import * as React from 'react';
 import './app.css';
 import { Canvas } from './canvas/Canvas';
 import { CPos } from './canvas/canvasUtils';
+import { Navbar } from './lib/ui/navbar/Navbar';
 
 interface AppState {
     w: number;
@@ -62,8 +63,12 @@ class App extends React.Component<any, AppState> {
                     <span>Y:</span><span>{this.state.mousePos.y}</span>
                     <button onClick={this.onAddPoint}>Add</button>
                 </div>
-                <div ref={this.dimRef} style={{border: '1px solid gray', flexGrow: 1}}>
-                    <Canvas width={this.state.w} height={this.state.h} onMouseMove={this.onMouseMove}/>
+                <div ref={this.dimRef} className={'appMain'}>
+                    <Navbar collapsible={true}>
+                        <button>Pol</button>
+                        <button>Lyn</button>
+                    </Navbar>
+                    <Canvas width={this.state.w} height={this.state.h} onMouseMove={this.onMouseMove} />
                 </div>
             </div>
         );

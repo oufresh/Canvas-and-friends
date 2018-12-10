@@ -1,0 +1,47 @@
+.navbarMain {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid gray;
+    background-color: rgba(231,231,231);
+    color: black;
+    justify-content: space-between;
+}
+
+.navbarButtons {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex-grow: 1;
+    width: 56px;
+}
+
+.navbarButtons button {
+    border: none;
+    box-shadow: none;
+    margin: 0px;
+    background: transparent;
+    width: 56px;
+    height: 56px;
+}
+
+.navbarButtons button:hover {
+    cursor: pointer;
+}
+
+.navbarCollapse {
+    width: 56px;
+    height: 56px;
+}
+
+.navbarCollapse button {
+    border: none;
+    box-shadow: none;
+    margin: 0px;
+    background: transparent;
+    width: 56px;
+    height: 56px;
+}
+
+.navbarCollapse button:hover {
+    cursor: pointer;
+}

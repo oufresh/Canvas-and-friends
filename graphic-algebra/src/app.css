@@ -9,13 +9,9 @@
     flex-direction: column;
 }
 
-.appNavbar {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    z-index: 1000;
-    height: 100vh;
-    width: 200px;
-    transform: translateY(-100%);
-    transition: transfomr 500ms ease-in-out;
+.appMain {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
 }

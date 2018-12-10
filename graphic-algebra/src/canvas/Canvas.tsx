@@ -26,6 +26,7 @@ declare type CanvasState = {
     lines: Array<Line>;
     points: Array<Point>;
     polygons: Array<Polygon>;
+    viewPort: Array<number>;
 };
 
 class Canvas extends React.Component<CanvasProps, CanvasState> {
@@ -40,6 +41,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         this.state = {
             translate: false,
             rotate: false,
+            viewPort: [800, 600],
             mousePos: {
                 x: 0, 
                 y: 0
@@ -52,13 +54,20 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
     }
 
+    private clear() {
+        this.cContext = this.cRef.current ? this.cRef.current.getContext('2d') : null;
+        if (this.cContext) {
+            this.cContext.clearRect(0, 0, this.state.viewPort[0], this.state.viewPort[1]);
+        }
+    }
+
     componentDidMount() {
         this.cContext = this.cRef.current ? this.cRef.current.getContext('2d') : null;
+        const w = this.cRef.current ? this.cRef.current.clientWidth : 800;
+        const h = this.cRef.current ? this.cRef.current.clientHeight : 600;
         this.canvasPos = getCanvasPos(this.cRef.current);
-        if (this.cContext) {
-            this.cContext.clearRect(0, 0, this.props.width, this.props.height);
-        }
-        
+        this.clear();
+
         const line = new ExpLine(new Point(100, 100), new Point(300, 500), 10);
         /*const pol = new Polyline(new Point(10,10), new Point(150,110));
         pol.addPoint(new Point(100, 100), 1);*/
@@ -74,13 +83,14 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         this.setState({
             lines: [line],
             points: [],
-            polygons: [pol]
+            polygons: [pol],
+            viewPort: [w, h]
         });
     }
 
     componentDidUpdate(prevProps: CanvasProps) {
         if (this.cContext) {
-            this.cContext.clearRect(0, 0, this.props.width, this.props.height);
+            this.clear();
 
             // const ep = new ExpPoint(200, 200, 10);
             const strokeStyle = /*p.hit(this.state.mousePos.x, this.state.mousePos.y) === true ? "red" : */'black';
@@ -140,7 +150,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
     render() {
         return (
-            <canvas ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}/>
+            <canvas style={{flexGrow: 1}} ref={this.cRef} width={this.state.viewPort[0]} height={this.state.viewPort[1]} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}/>
         );
     }
 }
