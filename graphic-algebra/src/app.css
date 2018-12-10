@@ -5,9 +5,11 @@
     position: fixed;
     width: 100vw;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-.appSidebar {
+.appNavbar {
     position: absolute;
     top: 0px;
     left: 0px;
