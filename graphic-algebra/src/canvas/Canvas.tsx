@@ -91,6 +91,16 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         }
     }
 
+    drawCircle(c: Point, r: number) {
+        if (this.cContext) {
+            const oldStyle = this.cContext.strokeStyle;
+            this.cContext.strokeStyle = 'blue';
+            this.cContext.arc(c.x, c.y, r, 0, 2 * Math.PI, false);
+            this.cContext.stroke();
+            this.cContext.strokeStyle = oldStyle;
+        }
+    }
+    
     drawPolygon = (ctx: CanvasRenderingContext2D, pol: Polygon, hit ?: boolean): void => {
         // fare unca calc style partendo dallo stato del polygon se ha over o
         // altri effetti
@@ -148,6 +158,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                 const collision = circleInLine(line.vertex[0].x, line.vertex[0].y, line.vertex[1].x, line.vertex[1].y, point.x, point.y, 10);
                 console.log(collision);
                 this.drawPoint(new Point(collision.x, collision.y));
+                this.drawCircle(point, 10);
             });
 
             this.state.polygons.forEach((pol: Polygon) => {
