@@ -26,7 +26,29 @@ export interface CanvasProps {
 declare type CanvasState = {
     translate: boolean;
     rotate: boolean;
+    ready: boolean;
 };
+
+const CanvasContext: any =  React.createContext({ ctx: null});
+
+interface PointProps {
+    x: number;
+    y: number;
+}
+
+class RPoint extends React.Component<PointProps> {
+    componentDidUpdate() {
+        const ctx = this.context.ctx;
+        // console.log(ctx);
+        Shape2Draw.drawPoint(ctx, new Point(this.props.x, this.props.y), true);
+    }
+    render() {
+        return (
+            null
+        );
+    }
+}
+RPoint.contextType = CanvasContext;
 
 class Canvas extends React.Component<CanvasProps, CanvasState> {
     cRef: React.RefObject<HTMLCanvasElement>;
@@ -38,7 +60,8 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         this.cRef = React.createRef();
         this.state = {
             translate: false,
-            rotate: false
+            rotate: false,
+            ready: false
         };
 
     }
@@ -51,15 +74,21 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
     componentDidMount() {
         this.cContext = this.cRef.current ? this.cRef.current.getContext('2d') : null;
+        // CanvasContext = React.createContext({
+        //    ctx: this.cContext
+        // });
         this.clear();
+        this.setState({
+            ready: true
+        });
     }
 
     componentDidUpdate(prevProps: CanvasProps) {
-        if (this.cContext) {
+        /*if (this.cContext) {
             this.clear();
 
             // const ep = new ExpPoint(200, 200, 10);
-            const strokeStyle = /*p.hit(this.state.mousePos.x, this.state.mousePos.y) === true ? "red" : */'black';
+            // const strokeStyle = p.hit(this.state.mousePos.x, this.state.mousePos.y) === true ? "red" : 'black';
             // console.log(strokeStyle);
             this.cContext.strokeStyle = strokeStyle;
 
@@ -68,15 +97,15 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                     Shape2Draw.drawLine(this.cContext, line);
                 }
 
-                /*if (line instanceof ExpLine) {
+                if (line instanceof ExpLine) {
                     const eLine = line as ExpLine;
                     eLine.expVertex.forEach((v: Point, i: number) => {
                         this.drawPoint(v);
                     });
                     // fill in the pixel at (10,10)  
                     // this.cContext.fillRect(eLine.expVertex[1].x, eLine.expVertex[1].y, 1, 1); // fill in the pixel at (10,10)  
-                }*/
-            });
+                }
+            // });
 
             this.props.shapes.points.forEach((point: Point) => {
                 if (this.cContext) {
@@ -98,7 +127,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                     Shape2Draw.drawPolygon(this.cContext, pol, hit);
                 }
             });
-        }
+        }*/
     }
     onMouseMove = (e: any) => {
         const pos = getMousePos(this.cRef.current, e);
@@ -120,7 +149,13 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
     render() {
         return (
-            <canvas ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}/>
+            <React.Fragment>
+                <CanvasContext.Provider value={{ctx: this.cContext}}>
+                    <canvas ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}>
+                        <RPoint x={100} y={100} />
+                    </canvas>
+                </CanvasContext.Provider>
+            </React.Fragment>
         );
     }
 }

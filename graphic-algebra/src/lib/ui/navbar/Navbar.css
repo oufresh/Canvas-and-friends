@@ -13,6 +13,8 @@
     justify-content: flex-start;
     flex-grow: 1;
     width: 56px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .navbarButtons button {
