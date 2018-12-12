@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     border-right: 1px solid gray;
-    background-color: rgba(231,231,231);
+    background-color: rgba(245,245,245,1);
     color: black;
     justify-content: space-between;
 }
@@ -22,10 +22,16 @@
     background: transparent;
     width: 56px;
     height: 56px;
+    flex: 0 0 56px;
+}
+
+.navbarButtons button.selected {
+    background-color: rgba(231,231,231,1)
 }
 
 .navbarButtons button:hover {
     cursor: pointer;
+    background-color: rgba(231,231,231,1)
 }
 
 .navbarCollapse {
@@ -44,4 +50,5 @@
 
 .navbarCollapse button:hover {
     cursor: pointer;
+    background-color: rgba(231,231,231,1)
 }

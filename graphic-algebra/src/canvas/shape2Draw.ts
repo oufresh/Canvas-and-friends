@@ -2,10 +2,10 @@ import { Point } from '../point';
 import { Polygon } from '../shapes/polygon';
 import { Line } from '../line';
 
-export function drawPoint(ctx: CanvasRenderingContext2D, p: Point): void {
+export function drawPoint(ctx: CanvasRenderingContext2D, p: Point, hit: boolean): void {
     if (ctx) {
         const oldStyle = ctx.strokeStyle;
-        ctx.strokeStyle = 'red';
+        ctx.strokeStyle = hit === true ? 'rgba(255, 0, 0, 1)' : 'rgba(255, 0, 0, 0.75)';
         ctx.beginPath();
         ctx.moveTo(p.x - 3, p.y);
         ctx.lineTo(p.x + 3, p.y);

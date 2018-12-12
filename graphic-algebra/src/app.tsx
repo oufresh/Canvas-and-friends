@@ -1,50 +1,55 @@
 import * as React from 'react';
 import './app.css';
-import { Canvas } from './canvas/Canvas';
-import { CPos } from './canvas/canvasUtils';
+import { CanvasContainer } from './canvas/CanvasContainer';
+import { ShapeTypes } from './canvas/canvasShapes';
 import { Navbar } from './lib/ui/navbar/Navbar';
 
 interface AppState {
-    w: number;
-    h: number;
-    mousePos: CPos;
+    drawingType: ShapeTypes;
+}
+
+export interface NavButtonsProps {
+    drawingType: ShapeTypes;
+    onClick?: (drawingType: ShapeTypes) => any;
+}
+
+class NavButtons extends React.Component<NavButtonsProps> {
+
+    onClick = (e: React.SyntheticEvent<HTMLButtonElement>) => {
+        const t = e.target as HTMLButtonElement;
+        if (this.props.onClick && t.dataset.shape) {
+            this.props.onClick(ShapeTypes[t.dataset.shape]);
+        }
+    }
+
+    render() {
+        const { drawingType } = this.props;
+        return (
+            <React.Fragment>
+                <button data-shape={ShapeTypes.POINT} onClick={this.onClick} className={drawingType === ShapeTypes.POINT ? 'selected' : ''}>Pt</button>
+                <button data-shape={ShapeTypes.LINE} onClick={this.onClick} className={drawingType === ShapeTypes.LINE ? 'selected' : ''}>Lyn</button>
+                <button data-shape={ShapeTypes.POLYLINE} onClick={this.onClick} className={drawingType === ShapeTypes.POLYLINE ? 'selected' : ''}>PLyn</button>
+                <button data-shape={ShapeTypes.POLYGON} onClick={this.onClick} className={drawingType === ShapeTypes.POLYGON ? 'selected' : ''}>Pol</button>
+                <button data-shape={ShapeTypes.MOVEMENT} onClick={this.onClick} className={drawingType === ShapeTypes.MOVEMENT ? 'selected' : ''}>Mov</button>
+            </React.Fragment>
+        );
+    }
 }
 
 class App extends React.Component<any, AppState> {
     state: AppState;
-    dimRef: React.RefObject<HTMLDivElement>;
 
     constructor(props: any) {
         super(props);
         this.state = {
-            w: 800,
-            h: 500,
-            mousePos: {
-                x: 0,
-                y: 0
-            }
+            drawingType: ShapeTypes.POINT
         };
-        this.dimRef = React.createRef();
     }
 
-    componentDidMount() {
-        if (this.dimRef.current) {
-            const w = this.dimRef.current.clientWidth;
-            const h = this.dimRef.current.clientHeight;
-            this.setState({w, h});
-        }
-    }
-
-    onMouseMove = (pos: CPos) => {
-        /*if (e.nativeEvent.region) {
-            console.log(e.nativeEvent.region);
-            alert(e.nativeEvent.region);
-        }*/
-        this.setState({ mousePos: pos});
-    }
-
-    onMouseclick = (e: any) => {
-        console.log('click');
+    onChangeShape = (drawingType: ShapeTypes) => {
+        this.setState({
+            drawingType
+        });
     }
 
     onAddPoint = () => {
@@ -58,17 +63,14 @@ class App extends React.Component<any, AppState> {
     render() {
         return (
             <div className={'appContainer'}>
-                <div>
-                    <span>X:</span><span>{this.state.mousePos.x}</span>
-                    <span>Y:</span><span>{this.state.mousePos.y}</span>
-                    <button onClick={this.onAddPoint}>Add</button>
+                <div className={'appHeader'}>
+                    <label>Canvas testing app</label>
                 </div>
-                <div ref={this.dimRef} className={'appMain'}>
+                <div className={'appMain'}>
                     <Navbar collapsible={true}>
-                        <button>Pol</button>
-                        <button>Lyn</button>
+                        <NavButtons drawingType={this.state.drawingType} onClick={this.onChangeShape} />
                     </Navbar>
-                    <Canvas width={this.state.w} height={this.state.h} onMouseMove={this.onMouseMove} />
+                    <CanvasContainer className={'appCanvas'} drawingType={this.state.drawingType}/>
                 </div>
             </div>
         );

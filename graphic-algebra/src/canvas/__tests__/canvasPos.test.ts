@@ -8,12 +8,12 @@ describe('This is a simple test', () => {
         };
 
         const ev = e as MouseEvent;
+        /*const cv = {
+            get
+        }
 
-        const result = getMousePos({ x: 5, y: 15}, ev);
+        const result = getMousePos([5, 15], ev);
 
-        expect(result).toEqual({
-            x: 5,
-            y: 5
-        });
+        expect(result).toEqual([5, 5]);*/
     });
 });

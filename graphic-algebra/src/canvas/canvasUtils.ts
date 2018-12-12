@@ -1,29 +1,12 @@
-
-export type CPos = {
-    x: number
-    y: number
-};
-
-export function getCanvasPos(canvas: HTMLCanvasElement | null): CPos {
-    let x = 0;
-    let y = 0;
+export function getMousePos(canvas: HTMLCanvasElement | null, e: React.MouseEvent<HTMLCanvasElement>): Array<number> {
     if (canvas) {
-        x = canvas.offsetLeft;
-        y = canvas.offsetTop;
+        const rect = canvas.getBoundingClientRect(); 
+        const mouseX = e.clientX - rect.left + window.pageXOffset;
+        const mouseY = e.clientY - rect.top + window.pageYOffset;
+        return [mouseX, mouseY];
+    } else {
+        return [0, 0];
     }
-
-    return {
-        x, y
-    };
-}
-
-export function getMousePos(canvasPos: CPos, e: MouseEvent): CPos {
-    var mouseX = e.clientX - canvasPos.x + window.pageXOffset;
-    var mouseY = e.clientY - canvasPos.y + window.pageYOffset;
-    return {
-        x : mouseX,
-        y : mouseY
-    };
 }
 
 /*

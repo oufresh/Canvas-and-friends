@@ -1,0 +1,17 @@
+.canvasLogger {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    border-radius: 2px;
+    padding: 5px;
+    background-color: rgba(21,21,21,0.6);
+    color: white;
+    width: 300px;
+    height: 400px;
+    overflow-y: auto;
+    font-size: 10px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+}

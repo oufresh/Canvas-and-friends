@@ -1,91 +1,57 @@
 import * as React from 'react';
-import { CPos, getCanvasPos, getMousePos } from './canvasUtils';
+import { getMousePos } from './canvasUtils';
 import { Polyline } from '../polyline';
 import { Line, ExpLine } from '../line';
 import { Point, ExpPoint } from '../point';
 import { circleInLine } from '../collisions/circleOnLine';
+import { pointInCircle } from '../collisions/pointInCircle';
 import { Polygon } from '../shapes/polygon';
 import { pointInPolygon } from '../collisions/pointInPolygon';
 import * as Shape2Draw from './shape2Draw';
+import { CanvasShapes } from './canvasShapes';
 
-export interface OnMouseMoveFunc {
-    (pos: CPos): any;
+export interface OnMouseFunc {
+    (pos: Array<number>): any;
 }
 
 export interface CanvasProps {
     width: number;
     height: number;
-    onMouseMove?: OnMouseMoveFunc;
+    onMouseMove?: OnMouseFunc;
+    onMouseClick?: OnMouseFunc;
+    shapes: CanvasShapes;
+    mousePos: Array<number>;
 }
 
 declare type CanvasState = {
     translate: boolean;
     rotate: boolean;
-    mousePos: CPos;
-    polylines: Array<Polyline>;
-    lines: Array<Line>;
-    points: Array<Point>;
-    polygons: Array<Polygon>;
-    viewPort: Array<number>;
 };
 
 class Canvas extends React.Component<CanvasProps, CanvasState> {
     cRef: React.RefObject<HTMLCanvasElement>;
     cContext: CanvasRenderingContext2D | null;
     state: CanvasState;
-    canvasPos: CPos;
 
     constructor(props: CanvasProps) {
         super(props);
         this.cRef = React.createRef();
         this.state = {
             translate: false,
-            rotate: false,
-            viewPort: [800, 600],
-            mousePos: {
-                x: 0, 
-                y: 0
-            },
-            polylines: [],
-            lines: [],
-            points: [],
-            polygons: []
+            rotate: false
         };
 
     }
 
     private clear() {
-        this.cContext = this.cRef.current ? this.cRef.current.getContext('2d') : null;
         if (this.cContext) {
-            this.cContext.clearRect(0, 0, this.state.viewPort[0], this.state.viewPort[1]);
+            this.cContext.clearRect(0, 0, this.props.width, this.props.height);
         }
     }
 
     componentDidMount() {
         this.cContext = this.cRef.current ? this.cRef.current.getContext('2d') : null;
-        const w = this.cRef.current ? this.cRef.current.clientWidth : 800;
-        const h = this.cRef.current ? this.cRef.current.clientHeight : 600;
-        this.canvasPos = getCanvasPos(this.cRef.current);
         this.clear();
-
-        const line = new ExpLine(new Point(100, 100), new Point(300, 500), 10);
-        /*const pol = new Polyline(new Point(10,10), new Point(150,110));
-        pol.addPoint(new Point(100, 100), 1);*/
-        // const point = new Point(200, 200);
-
-        const pol = new Polygon();
-        pol.pushVertex([350, 50]);
-        pol.pushVertex([650, 100]);
-        pol.pushVertex([785, 150]);
-        pol.pushVertex([450, 120]);
-        pol.pushVertex([350, 140]);
-
-        this.setState({
-            lines: [line],
-            points: [],
-            polygons: [pol],
-            viewPort: [w, h]
-        });
     }
 
     componentDidUpdate(prevProps: CanvasProps) {
@@ -97,7 +63,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
             // console.log(strokeStyle);
             this.cContext.strokeStyle = strokeStyle;
 
-            this.state.lines.forEach((line: Line) => {
+            this.props.shapes.lines.forEach((line: Line) => {
                 if (this.cContext) {
                     Shape2Draw.drawLine(this.cContext, line);
                 }
@@ -112,45 +78,49 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                 }*/
             });
 
-            this.state.points.forEach((point: Point) => {
+            this.props.shapes.points.forEach((point: Point) => {
                 if (this.cContext) {
-                    Shape2Draw.drawPoint(this.cContext, point);
-                    const line = this.state.lines[0];
-                    const collision = circleInLine(line.vertex[0].x, line.vertex[0].y, line.vertex[1].x, line.vertex[1].y, point.x, point.y, 10);
+                    const hit = pointInCircle(point.x, point.y, this.props.mousePos[0], this.props.mousePos[1], 3);
+                    Shape2Draw.drawPoint(this.cContext, point, hit);
+                    // const line = this.props.shapes.lines[0];
+                    // const collision = circleInLine(line.vertex[0].x, line.vertex[0].y, line.vertex[1].x, line.vertex[1].y, point.x, point.y, 10);
                     // console.log(collision);
-                    Shape2Draw.drawCircle(this.cContext, point, 10, collision.hit);
-                    if (collision.onSegment === true) {
-                        Shape2Draw.drawPoint(this.cContext, new Point(collision.x, collision.y));
-                    }
+                    // Shape2Draw.drawCircle(this.cContext, point, 10, collision.hit);
+                    // if (collision.onSegment === true) {
+                    //     Shape2Draw.drawPoint(this.cContext, new Point(collision.x, collision.y));
+                    // }
                 }
             });
 
-            this.state.polygons.forEach((pol: Polygon) => {
+            this.props.shapes.polygons.forEach((pol: Polygon) => {
                 if (this.cContext) {
-                    const hit = pointInPolygon(pol.vertices, this.state.mousePos.x, this.state.mousePos.y);
+                    const hit = pointInPolygon(pol.vertices, this.props.mousePos[0], this.props.mousePos[1]);
                     Shape2Draw.drawPolygon(this.cContext, pol, hit);
                 }
             });
         }
     }
     onMouseMove = (e: any) => {
-        const pos = getMousePos(this.canvasPos, e);
-        this.setState({ mousePos: pos });
+        const pos = getMousePos(this.cRef.current, e);
         if (this.props.onMouseMove) {
             this.props.onMouseMove(pos);
         }
     }
 
-    onMouseclick = (e: any) => {
-        const pos = getMousePos(this.canvasPos, e);
-        this.setState({
-            points: [new Point(pos.x, pos.y)]
-        });
+    /**
+     * Per ora fa solo click ma poi devo
+     * capire se ho una collisione e come comportarmi
+     */
+    onMouseclick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const pos = getMousePos(this.cRef.current, e);
+        if (this.props.onMouseClick) {
+            this.props.onMouseClick(pos);
+        }
     }
 
     render() {
         return (
-            <canvas style={{flexGrow: 1}} ref={this.cRef} width={this.state.viewPort[0]} height={this.state.viewPort[1]} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}/>
+            <canvas ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}/>
         );
     }
 }
