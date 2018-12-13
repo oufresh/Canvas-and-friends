@@ -9,9 +9,10 @@ import { Polygon } from '../shapes/polygon';
 import { pointInPolygon } from '../collisions/pointInPolygon';
 import * as Shape2Draw from './shape2Draw';
 import { CanvasShapes } from './canvasShapes';
+import { CanvasPosition } from './types';
 
 export interface OnMouseFunc {
-    (pos: Array<number>): any;
+    (pos: CanvasPosition): any;
 }
 
 export interface CanvasProps {
@@ -20,7 +21,7 @@ export interface CanvasProps {
     onMouseMove?: OnMouseFunc;
     onMouseClick?: OnMouseFunc;
     shapes: CanvasShapes;
-    mousePos: Array<number>;
+    mousePos: CanvasPosition;
 }
 
 declare type CanvasState = {
@@ -32,15 +33,19 @@ declare type CanvasState = {
 const CanvasContext: any =  React.createContext({ ctx: null});
 
 interface PointProps {
-    x: number;
-    y: number;
+    x?: number;
+    y?: number;
+    point?: Point;
+    hit: boolean;
 }
 
 class RPoint extends React.Component<PointProps> {
     componentDidUpdate() {
         const ctx = this.context.ctx;
-        // console.log(ctx);
-        Shape2Draw.drawPoint(ctx, new Point(this.props.x, this.props.y), true);
+        const p = this.props.point ? this.props.point : (this.props.x !== undefined && this.props.y !== undefined ? new Point(this.props.x, this.props.y) : null);
+        if (p) {
+            Shape2Draw.drawPoint(ctx, p, this.props.hit);
+        }
     }
     render() {
         return (
@@ -70,6 +75,11 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         if (this.cContext) {
             this.cContext.clearRect(0, 0, this.props.width, this.props.height);
         }
+    }
+
+    shouldComponentUpdate(nextProps: CanvasProps, nextState: CanvasState, context: any): boolean {
+        // if (this.props.)
+        return true;
     }
 
     componentDidMount() {
@@ -149,13 +159,16 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
     render() {
         return (
-            <React.Fragment>
-                <CanvasContext.Provider value={{ctx: this.cContext}}>
-                    <canvas ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}>
-                        <RPoint x={100} y={100} />
-                    </canvas>
-                </CanvasContext.Provider>
-            </React.Fragment>
+            <CanvasContext.Provider value={{ctx: this.cContext}}>
+                <canvas ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}>
+                    {
+                        this.props.shapes.points.map((p: Point, index: number) => {
+                            const hit = pointInCircle(p.x, p.y, this.props.mousePos[0], this.props.mousePos[1], 3);
+                            return <RPoint key={'RPoint-' + index} point={p} hit={hit} />;
+                        })
+                    }
+                </canvas>
+            </CanvasContext.Provider>
         );
     }
 }

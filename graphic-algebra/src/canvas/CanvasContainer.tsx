@@ -3,6 +3,8 @@ import { CanvasShapes, createInitCanvasShapes, createPointShape, ShapeTypes } fr
 import { ResizeController, ResizeEvent } from '../lib/ui/resize/ResizeController';
 import { Canvas } from './Canvas';
 import { CanvasLogger } from '../lib/ui/canvasLogger/CanvasLogger';
+import { CanvasPosition } from './types';
+import * as rxjs from 'rxjs';
 
 export interface CanvasContainerProps {
     drawingType: ShapeTypes;
@@ -18,8 +20,15 @@ interface CanvasContainerState {
 
 export class CanvasContainer extends React.Component<CanvasContainerProps, CanvasContainerState> {
     state: CanvasContainerState;
+    clickSubj: rxjs.Subject<CanvasPosition>;
+    onclick: rxjs.Observable<CanvasPosition>;
+    moveSubj: rxjs.Subject<CanvasPosition>;
+    onMove: rxjs.Observable<CanvasPosition>;
+
     constructor(props: CanvasContainerProps) {
         super(props);
+        this.clickSubj = new rxjs.Subject();
+        this.moveSubj = new rxjs.Subject();
         this.state = {
             viewPort: [0, 0],
             mousePos: [0, 0],
@@ -28,19 +37,23 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
         };
     }
 
+    componentDidMount() {
+        this.onMove = this.moveSubj.asObservable();
+    }
+
     onCanvasResize = (re: ResizeEvent) => {
         this.setState({
             viewPort: [re.elemSize[0], re.elemSize[1]]
         });
     }
 
-    onMouseMove = (pos: Array<number>) => {
+    _onMouseMove = (pos: Array<number>) => {
         this.setState({
             mousePos: pos
         });
     }
 
-    onMouseClick = (pos: Array<number>) => {
+    _onMouseClick = (pos: Array<number>) => {
         const p = createPointShape(pos);
         const shapes = this.state.shapes;
         shapes.points.push(p);
@@ -59,8 +72,8 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
                         width={this.state.viewPort[0]}
                         height={this.state.viewPort[1]}
                         shapes={this.state.shapes}
-                        onMouseClick={this.onMouseClick}
-                        onMouseMove={this.onMouseMove}
+                        onMouseClick={this._onMouseClick}
+                        onMouseMove={this._onMouseMove}
                         mousePos={this.state.mousePos}
                     />
                     <CanvasLogger mouseCoords={this.state.mousePos} mouseClickPos={this.state.mouseClickPos}/>
