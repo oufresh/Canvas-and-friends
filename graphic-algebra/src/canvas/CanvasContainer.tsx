@@ -41,6 +41,12 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
         this.onMove = this.moveSubj.asObservable();
     }
 
+    componentDidUpdate(prevProps: CanvasContainerProps) {
+        if (prevProps.drawingType !== this.props.drawingType) {
+            
+        }
+    }
+
     onCanvasResize = (re: ResizeEvent) => {
         this.setState({
             viewPort: [re.elemSize[0], re.elemSize[1]]
