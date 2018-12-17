@@ -4,6 +4,7 @@ import { ResizeController, ResizeEvent } from '../lib/ui/resize/ResizeController
 import { Canvas } from './Canvas';
 import { CanvasLogger } from '../lib/ui/canvasLogger/CanvasLogger';
 import { CanvasPosition } from './types';
+import { manageOnClick } from './drawings';
 import * as rxjs from 'rxjs';
 
 export interface CanvasContainerProps {
@@ -24,6 +25,8 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
     onclick: rxjs.Observable<CanvasPosition>;
     moveSubj: rxjs.Subject<CanvasPosition>;
     onMove: rxjs.Observable<CanvasPosition>;
+    onDrawShapeObs: rxjs.Observable<any>; // any perché da capire cosa saraà con la nuova shape
+    onDrawShapeSub: rxjs.Subscription;
 
     constructor(props: CanvasContainerProps) {
         super(props);
@@ -39,11 +42,13 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
 
     componentDidMount() {
         this.onMove = this.moveSubj.asObservable();
+        this.onDrawShapeObs = manageOnClick(ShapeTypes.POINT, this.clickSubj);
+        this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
     }
 
     componentDidUpdate(prevProps: CanvasContainerProps) {
         if (prevProps.drawingType !== this.props.drawingType) {
-            
+            console.log('componentDidUpdate');
         }
     }
 
@@ -67,6 +72,11 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             shapes: shapes,
             mouseClickPos: pos
         });
+    }
+
+    _onDrawing = (s: any) => {
+        // qui dovrò fare la setState delle forme che
+        // sono state create
     }
 
     render() {
