@@ -14,7 +14,7 @@ export interface Drawing {
     shape: Shape;
 }
 
-export function manageOnClick(drawingType: ShapeTypes, clickSubj: rxjs.Subject<CanvasPosition>) {
+export function drawPointProcessor(clickSubj: rxjs.Subject<CanvasPosition>) {
     return clickSubj.pipe(operators.map((pos: CanvasPosition) => {
         return {
             type: ShapeTypes.POINT,
@@ -23,3 +23,9 @@ export function manageOnClick(drawingType: ShapeTypes, clickSubj: rxjs.Subject<C
     }));
 }
 
+export function createDrawingEventProcessor(drawingType: ShapeTypes, clickSubj: rxjs.Subject<CanvasPosition>, moveSubj: rxjs.Subject<CanvasPosition>): rxjs.Observable<Drawing> | null {
+    if (drawingType === ShapeTypes.POINT) {
+        return drawPointProcessor(clickSubj);
+    }
+    return null;
+}

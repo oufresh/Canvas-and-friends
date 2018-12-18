@@ -1,17 +1,22 @@
 import * as React from 'react';
-import { CanvasShapes, createInitCanvasShapes, createPointShape, ShapeTypes } from './canvasShapes';
+import { CanvasShapes, createInitCanvasShapes, ShapeTypes } from './canvasShapes';
 import { ResizeController, ResizeEvent } from '../lib/ui/resize/ResizeController';
 import { Canvas } from './Canvas';
 import { CanvasLogger } from '../lib/ui/canvasLogger/CanvasLogger';
 import { CanvasPosition } from './types';
-import { Drawing, manageOnClick } from './drawings';
+import { Drawing, createDrawingEventProcessor } from './drawings';
 import * as rxjs from 'rxjs';
+import * as operators from 'rxjs/operators';
 import { Point } from '../shapes/point';
+import { MouseHits, collisionProcessor } from './canvasCollisions';
 
 export interface CanvasContainerProps {
     drawingType: ShapeTypes;
     className?: string;
+    hoverActive?: boolean;
 }
+
+// mouse hit ora è un unico campo poi diventerà lo style che cambia
 
 interface CanvasContainerState {
     shapes: CanvasShapes;
@@ -19,6 +24,7 @@ interface CanvasContainerState {
     mousePos: Array<number>;
     mouseClickPos: Array<number>;
     currentShape: string;
+    mouseHits: MouseHits;
 }
 
 export class CanvasContainer extends React.Component<CanvasContainerProps, CanvasContainerState> {
@@ -26,29 +32,58 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
     clickSubj: rxjs.Subject<CanvasPosition>;
     // onclick: rxjs.Observable<CanvasPosition>;
     moveSubj: rxjs.Subject<CanvasPosition>;
-    onMove: rxjs.Observable<CanvasPosition>;
+    onMove: rxjs.Observable<CanvasPosition> | null;
     onDrawShapeObs: rxjs.Observable<any> | null; // any perché da capire cosa saraà con la nuova shape
     onDrawShapeSub: rxjs.Subscription | null;
+    onMouseHitObs: rxjs.Observable<MouseHits> | null;
+    onMouseHitSub: rxjs.Subscription | null;
 
     constructor(props: CanvasContainerProps) {
         super(props);
         this.clickSubj = new rxjs.Subject();
         this.moveSubj = new rxjs.Subject();
-        this.onMove = this.moveSubj.asObservable();
         this.state = {
             viewPort: [0, 0],
             mousePos: [0, 0],
             mouseClickPos: [0, 0],
-            currentShape: "",
-            shapes: createInitCanvasShapes()
+            currentShape: '',
+            shapes: createInitCanvasShapes(),
+            mouseHits: {
+                hits: new Set()
+            }
         };
+        this.onMove = null;
         this.onDrawShapeObs = null;
         this.onDrawShapeSub = null;
+        this.onMouseHitObs = null;
+        this.onMouseHitSub = null;
     }
 
     componentDidMount() {
-        this.onDrawShapeObs = manageOnClick(this.props.drawingType, this.clickSubj);
-        this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
+        this.onMove = this.moveSubj.asObservable();
+
+        // dovrà essere disattivabile hover con un flag di stato/props
+
+        this.onMouseHitObs = this.moveSubj.pipe(operators.filter((pos: CanvasPosition) => {
+            if (this.props.hoverActive !== undefined && this.props.hoverActive === true) {
+                return true;
+            } else {
+                return false;
+            }
+        }), operators.map((pos: CanvasPosition) => {
+            return collisionProcessor(pos, this.state.shapes);
+        }));
+        this.onMouseHitSub = this.onMouseHitObs.subscribe((mouseHits: MouseHits) => {
+            this.setState({ mouseHits });
+        });
+        this.onDrawShapeObs = createDrawingEventProcessor(this.props.drawingType, this.clickSubj, this.moveSubj);
+        if (this.onDrawShapeObs) {
+            this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
+        }
+    }
+
+    componentWillUnmount() {
+        // togliere tutte le subscribe
     }
 
     componentDidUpdate(prevProps: CanvasContainerProps) {

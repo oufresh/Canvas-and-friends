@@ -32,6 +32,8 @@
   ],
   "devDependencies": {
     "@types/gl-matrix": "^2.4.4",
-    "@types/mathjs": "^4.4.4"
+    "@types/mathjs": "^4.4.4",
+    "tslint": "^5.12.0",
+    "tslint-react": "^3.6.0"
   }
 }
