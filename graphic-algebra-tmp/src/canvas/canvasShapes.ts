@@ -1,7 +1,7 @@
-import { Line } from '../shapes/line';
-import { Point } from '../shapes/point';
+import { Line, ExpLine } from '../line';
+import { Point, ExpPoint } from '../shapes/point';
 import { Polygon } from '../shapes/polygon';
-import { Polyline } from '../shapes/polyline';
+import { Polyline } from '../polyline';
 
 export enum ShapeTypes {
     POINT = 'POINT',

@@ -1,9 +1,12 @@
+import { Shape } from './base';
 
-export class Point {
+export class Point implements Shape {
+    id: string;
     x: number;
     y: number;
 
-    constructor(x: number, y: number) {
+    constructor(id: string, x: number, y: number) {
+        this.id = id;
         this.x = x;
         this.y = y;
     }
@@ -19,8 +22,8 @@ export class Point {
 
 export class ExpPoint extends Point {
     r: number;
-    constructor(x: number, y: number, r: number) {
-        super(x, y);
+    constructor(id: string, x: number, y: number, r: number) {
+        super(id, x, y);
         this.r = r;
     }
 

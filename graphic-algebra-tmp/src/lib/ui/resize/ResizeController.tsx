@@ -24,8 +24,8 @@ interface ReasizeContrllerState {
 export class ResizeController extends React.PureComponent<ResizeContrllerProps, ReasizeContrllerState> {
     state: ReasizeContrllerState;
     divRef: React.RefObject<HTMLDivElement>;
-    resizeO: Rxjs.Observable<Event> | null;
-    resizSub: Rxjs.Subscription | null;
+    resizeO: Rxjs.Observable<Event>;
+    resizSub: Rxjs.Subscription;
 
     constructor(props: ResizeContrllerProps) {
         super(props);
@@ -34,8 +34,6 @@ export class ResizeController extends React.PureComponent<ResizeContrllerProps, 
             height: 0
         };
         this.divRef = React.createRef();
-        this.resizeO = null;
-        this.resizSub = null;
     }
 
     componentDidMount() {
@@ -62,8 +60,7 @@ export class ResizeController extends React.PureComponent<ResizeContrllerProps, 
     }
 
     componentWillUnmount() {
-        if (this.resizSub)
-            this.resizSub.unsubscribe();
+        this.resizSub.unsubscribe();
     }
 
     render() {

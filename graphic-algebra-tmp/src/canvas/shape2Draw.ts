@@ -1,6 +1,6 @@
-import { Point } from '../shapes/point';
+import { Point } from '../point';
 import { Polygon } from '../shapes/polygon';
-import { Line } from '../shapes/line';
+import { Line } from '../line';
 
 export function drawPoint(ctx: CanvasRenderingContext2D, p: Point, hit: boolean): void {
     if (ctx) {

@@ -1,0 +1,28 @@
+{
+  "name": "graphic-algebra",
+  "version": "1.0.0",
+  "description": "Graphic algebra with canvas for rendering",
+  "main": "src/index.html",
+  "scripts": {
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject"
+  },
+  "dependencies": {
+    "gl-matrix": "^2.8.1",
+    "mathjs": "^5.3.1",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-scripts-ts": "3.1.0",
+    "rxjs": "^6.3.3"
+  },
+  "devDependencies": {
+    "@types/gl-matrix": "^2.4.4",
+    "@types/jest": "^23.3.10",
+    "@types/mathjs": "^4.4.3",
+    "@types/react": "^16.7.13",
+    "@types/react-dom": "^16.0.11",
+    "typescript": "^3.2.1"
+  }
+}

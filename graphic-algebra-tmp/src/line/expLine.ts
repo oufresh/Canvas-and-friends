@@ -1,5 +1,5 @@
 import { Line } from './line';
-import { Point } from '../point/point';
+import { Point } from '../shapes/point';
 import * as glMatrix from 'gl-matrix';
 
 export class ExpLine extends Line {

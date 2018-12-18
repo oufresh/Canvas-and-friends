@@ -1,5 +1,5 @@
 import * as React from 'react';
-import './App.css';
+import './app.css';
 import { CanvasContainer } from './canvas/CanvasContainer';
 import { ShapeTypes } from './canvas/canvasShapes';
 import { Navbar } from './lib/ui/navbar/Navbar';
@@ -17,9 +17,9 @@ class NavButtons extends React.Component<NavButtonsProps> {
 
     onClick = (e: React.SyntheticEvent<HTMLButtonElement>) => {
         const t = e.target as HTMLButtonElement;
-        /*if (this.props.onClick && t.dataset.shape) {
+        if (this.props.onClick && t.dataset.shape) {
             this.props.onClick(ShapeTypes[t.dataset.shape]);
-        }*/
+        }
     }
 
     render() {

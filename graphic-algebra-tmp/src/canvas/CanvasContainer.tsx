@@ -4,9 +4,8 @@ import { ResizeController, ResizeEvent } from '../lib/ui/resize/ResizeController
 import { Canvas } from './Canvas';
 import { CanvasLogger } from '../lib/ui/canvasLogger/CanvasLogger';
 import { CanvasPosition } from './types';
-import { Drawing, manageOnClick } from './drawings';
+import { manageOnClick } from './drawings';
 import * as rxjs from 'rxjs';
-import { Point } from '../shapes/point';
 
 export interface CanvasContainerProps {
     drawingType: ShapeTypes;
@@ -24,29 +23,26 @@ interface CanvasContainerState {
 export class CanvasContainer extends React.Component<CanvasContainerProps, CanvasContainerState> {
     state: CanvasContainerState;
     clickSubj: rxjs.Subject<CanvasPosition>;
-    // onclick: rxjs.Observable<CanvasPosition>;
+    onclick: rxjs.Observable<CanvasPosition>;
     moveSubj: rxjs.Subject<CanvasPosition>;
     onMove: rxjs.Observable<CanvasPosition>;
-    onDrawShapeObs: rxjs.Observable<any> | null; // any perché da capire cosa saraà con la nuova shape
-    onDrawShapeSub: rxjs.Subscription | null;
+    onDrawShapeObs: rxjs.Observable<any>; // any perché da capire cosa saraà con la nuova shape
+    onDrawShapeSub: rxjs.Subscription;
 
     constructor(props: CanvasContainerProps) {
         super(props);
         this.clickSubj = new rxjs.Subject();
         this.moveSubj = new rxjs.Subject();
-        this.onMove = this.moveSubj.asObservable();
         this.state = {
             viewPort: [0, 0],
             mousePos: [0, 0],
             mouseClickPos: [0, 0],
-            currentShape: "",
             shapes: createInitCanvasShapes()
         };
-        this.onDrawShapeObs = null;
-        this.onDrawShapeSub = null;
     }
 
     componentDidMount() {
+        this.onMove = this.moveSubj.asObservable();
         this.onDrawShapeObs = manageOnClick(this.props.drawingType, this.clickSubj);
         this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
     }
@@ -70,27 +66,19 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
     }
 
     _onMouseClick = (pos: Array<number>) => {
-        /*const p = createPointShape(new Date().getTime().toString, pos);
+        const p = createPointShape(pos);
         const shapes = this.state.shapes;
         shapes.points.push(p);
         this.setState({
             shapes: shapes,
             mouseClickPos: pos
-        });*/
-        this.clickSubj.next(pos);
+        });
     }
 
-    _onDrawing = (ds: Drawing) => {
+    _onDrawing = (s: Shape) => {
         // qui dovrò fare la setState delle forme che
         // sono state create
-        if (ds.type === ShapeTypes.POINT) {
-            const shapes = this.state.shapes;
-            shapes.points.set(ds.shape.id, ds.shape as Point);
-            this.setState({
-                shapes,
-                currentShape: ds.shape.id
-            });
-        }
+        
     }
 
     render() {
