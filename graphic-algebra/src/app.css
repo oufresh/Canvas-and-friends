@@ -13,6 +13,18 @@
     border-bottom: 1px solid gray;
     background-color: rgba(241,241,241);
     padding: 2px 4px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.appTitle {
+    font-weight: bold;
+}
+
+.appButtons {
+    display: flex;
+    flex-direction: row;
 }
 
 .appMain {
@@ -22,12 +34,12 @@
     justify-content: flex-start;
 }
 
-.appCanvas {
+.appResize {
     position: relative;
     flex-grow: 1;
 }
 
-.appCanvas canvas {
+.appCanvas {
     position: absolute;
     top: 0px;
     left: 0px;

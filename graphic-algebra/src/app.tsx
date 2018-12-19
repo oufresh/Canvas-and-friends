@@ -36,6 +36,20 @@ class NavButtons extends React.Component<NavButtonsProps> {
     }
 }
 
+interface AppHeaderProps {
+    hoverActive: boolean;
+    onClickHover: () => void;
+}
+
+const AppHeader = (props: AppHeaderProps) => {
+    return (
+        <div className={'appHeader'}>
+            <label>Canvas testing app</label>
+            <div><button onClick={props.onClickHover}>Hover</button></div>
+        </div>
+    );
+};
+
 class App extends React.Component<any, AppState> {
     state: AppState;
 
@@ -70,7 +84,7 @@ class App extends React.Component<any, AppState> {
                     <Navbar collapsible={true}>
                         <NavButtons drawingType={this.state.drawingType} onClick={this.onChangeShape} />
                     </Navbar>
-                    <CanvasContainer className={'appCanvas'} drawingType={this.state.drawingType}/>
+                    <CanvasContainer className={'appResize'} drawingType={this.state.drawingType} hoverActive={true}/>
                 </div>
             </div>
         );

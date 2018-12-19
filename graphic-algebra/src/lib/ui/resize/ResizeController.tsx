@@ -62,8 +62,9 @@ export class ResizeController extends React.PureComponent<ResizeContrllerProps, 
     }
 
     componentWillUnmount() {
-        if (this.resizSub)
+        if (this.resizSub) {
             this.resizSub.unsubscribe();
+        }
     }
 
     render() {

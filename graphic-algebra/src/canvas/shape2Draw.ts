@@ -4,15 +4,19 @@ import { Line } from '../shapes/line';
 
 export function drawPoint(ctx: CanvasRenderingContext2D, p: Point, hit: boolean): void {
     if (ctx) {
+        const L = hit === true ? 5 : 3;
         const oldStyle = ctx.strokeStyle;
+        const oldlineWidth = ctx.lineWidth;
         ctx.strokeStyle = hit === true ? 'rgba(255, 0, 0, 1)' : 'rgba(255, 0, 0, 0.75)';
+        ctx.lineWidth = hit === true ? 2 : 1;
         ctx.beginPath();
-        ctx.moveTo(p.x - 3, p.y);
-        ctx.lineTo(p.x + 3, p.y);
-        ctx.moveTo(p.x, p.y - 3);
-        ctx.lineTo(p.x, p.y + 3);
+        ctx.moveTo(p.x - L, p.y);
+        ctx.lineTo(p.x + L, p.y);
+        ctx.moveTo(p.x, p.y - L);
+        ctx.lineTo(p.x, p.y + L);
         ctx.stroke();
         ctx.strokeStyle = oldStyle;
+        ctx.lineWidth = oldlineWidth;
     }
 }
 

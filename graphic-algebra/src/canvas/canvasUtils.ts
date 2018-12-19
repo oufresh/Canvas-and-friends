@@ -3,7 +3,7 @@ export function getMousePos(canvas: HTMLCanvasElement | null, e: React.MouseEven
         const rect = canvas.getBoundingClientRect(); 
         const mouseX = e.clientX - rect.left + window.pageXOffset;
         const mouseY = e.clientY - rect.top + window.pageYOffset;
-        return [mouseX, mouseY];
+        return [Math.round(mouseX), Math.round(mouseY)];
     } else {
         return [0, 0];
     }

@@ -25,7 +25,10 @@ interface CanvasContainerState {
     mouseClickPos: Array<number>;
     currentShape: string;
     mouseHits: MouseHits;
+    delete: boolean;
 }
+
+const mouseHoverFilter = (hoverActive?: boolean) => (hoverActive !== undefined && hoverActive === true);
 
 export class CanvasContainer extends React.Component<CanvasContainerProps, CanvasContainerState> {
     state: CanvasContainerState;
@@ -33,8 +36,11 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
     // onclick: rxjs.Observable<CanvasPosition>;
     moveSubj: rxjs.Subject<CanvasPosition>;
     onMove: rxjs.Observable<CanvasPosition> | null;
-    onDrawShapeObs: rxjs.Observable<any> | null; // any perché da capire cosa saraà con la nuova shape
+    onMoveSub: rxjs.Subscription | null;
+    onDrawShapeObs: rxjs.Observable<Drawing> | null; // any perché da capire cosa saraà con la nuova shape
     onDrawShapeSub: rxjs.Subscription | null;
+    onDeleteShapeObs: rxjs.Observable<MouseHits> | null;
+    onDeleteShapeSub: rxjs.Subscription | null;
     onMouseHitObs: rxjs.Observable<MouseHits> | null;
     onMouseHitSub: rxjs.Subscription | null;
 
@@ -50,32 +56,41 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             shapes: createInitCanvasShapes(),
             mouseHits: {
                 hits: new Set()
-            }
+            },
+            delete: false
         };
         this.onMove = null;
+        this.onMoveSub = null;
+
         this.onDrawShapeObs = null;
         this.onDrawShapeSub = null;
+        this.onDeleteShapeObs = null;
+        this.onDeleteShapeSub = null;
+
         this.onMouseHitObs = null;
         this.onMouseHitSub = null;
     }
 
     componentDidMount() {
-        this.onMove = this.moveSubj.asObservable();
+        this.onMove = this.moveSubj.asObservable().pipe(operators.filter(() => mouseHoverFilter(this.props.hoverActive)));
+        this.onMoveSub = this.onMove.subscribe((pos: CanvasPosition) => {
+            this.setState({
+                mousePos: pos
+            });
+        });
 
         // dovrà essere disattivabile hover con un flag di stato/props
 
         this.onMouseHitObs = this.moveSubj.pipe(operators.filter((pos: CanvasPosition) => {
-            if (this.props.hoverActive !== undefined && this.props.hoverActive === true) {
-                return true;
-            } else {
-                return false;
-            }
+            return (this.props.hoverActive !== undefined && this.props.hoverActive === true);
         }), operators.map((pos: CanvasPosition) => {
             return collisionProcessor(pos, this.state.shapes);
         }));
         this.onMouseHitSub = this.onMouseHitObs.subscribe((mouseHits: MouseHits) => {
             this.setState({ mouseHits });
         });
+
+        // da cambiare con la delete se cambia la prop delete nell'update
         this.onDrawShapeObs = createDrawingEventProcessor(this.props.drawingType, this.clickSubj, this.moveSubj);
         if (this.onDrawShapeObs) {
             this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
@@ -99,19 +114,10 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
     }
 
     _onMouseMove = (pos: Array<number>) => {
-        this.setState({
-            mousePos: pos
-        });
+        this.moveSubj.next(pos);
     }
 
     _onMouseClick = (pos: Array<number>) => {
-        /*const p = createPointShape(new Date().getTime().toString, pos);
-        const shapes = this.state.shapes;
-        shapes.points.push(p);
-        this.setState({
-            shapes: shapes,
-            mouseClickPos: pos
-        });*/
         this.clickSubj.next(pos);
     }
 
@@ -140,6 +146,7 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
                         onMouseClick={this._onMouseClick}
                         onMouseMove={this._onMouseMove}
                         mousePos={this.state.mousePos}
+                        mouseHits={this.state.mouseHits}
                     />
                     <CanvasLogger mouseCoords={this.state.mousePos} mouseClickPos={this.state.mouseClickPos}/>
                 </React.Fragment> : <h3>Preparing ...</h3>

@@ -2,14 +2,15 @@ import * as React from 'react';
 import { getMousePos } from './canvasUtils';
 import { Polyline } from '../shapes/polyline';
 import { Line } from '../shapes/line';
-import { Point, ExpPoint } from '../shapes/point';
+import { PCPoint } from './shapes/PPoint';
 import { circleInLine } from '../collisions/circleOnLine';
 import { pointInCircle } from '../collisions/pointInCircle';
-import { Polygon } from '../shapes/polygon';
+import { Point } from '../shapes/point';
 import { pointInPolygon } from '../collisions/pointInPolygon';
 import * as Shape2Draw from './shape2Draw';
 import { CanvasShapes } from './canvasShapes';
 import { CanvasPosition } from './types';
+import { MouseHits } from './canvasCollisions';
 
 export interface OnMouseFunc {
     (pos: CanvasPosition): any;
@@ -22,6 +23,7 @@ export interface CanvasProps {
     onMouseClick?: OnMouseFunc;
     shapes: CanvasShapes;
     mousePos: CanvasPosition;
+    mouseHits: MouseHits;
 }
 
 declare type CanvasState = {
@@ -30,14 +32,27 @@ declare type CanvasState = {
     ready: boolean;
 };
 
-const CanvasContext: any =  React.createContext({ ctx: null});
+export interface CanvasContextType {
+    ctx: CanvasRenderingContext2D | null;
+}
+
+export const CanvasContext: React.Context<any> =  React.createContext({ ctx: null});
+
+export function withContext<C extends React.ComponentClass>(Component: C): C {
+    return ((props: any) => (
+        <CanvasContext.Consumer>
+            {context => <Component {...props} context={context} />}
+        </CanvasContext.Consumer>
+      )) as any as C;
+}
 
 interface PointProps {
     point?: Point;
     hit: boolean;
 }
 
-class RPoint extends React.Component<PointProps> {
+class RPoint extends React.PureComponent<PointProps> {
+    static contextType = CanvasContext;
     componentDidUpdate() {
         const ctx = this.context.ctx;
         if (this.props.point) {
@@ -50,7 +65,6 @@ class RPoint extends React.Component<PointProps> {
         );
     }
 }
-RPoint.contextType = CanvasContext;
 
 class Canvas extends React.Component<CanvasProps, CanvasState> {
     cRef: React.RefObject<HTMLCanvasElement>;
@@ -157,14 +171,16 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
     render() {
         const shapes = [];
-        for (let point of this.props.shapes.points.values()) {
-            const hit = pointInCircle(point.x, point.y, this.props.mousePos[0], this.props.mousePos[1], 3);
-            shapes.push(<RPoint key={'RPoint-' + point.id} point={point} hit={hit} />)
+        if (this.state.ready === true) {
+            for (let point of this.props.shapes.points.values()) {
+                const hit = this.props.mouseHits.hits.has(point.id); // pointInCircle(point.x, point.y, this.props.mousePos[0], this.props.mousePos[1], 3);
+                shapes.push(<PCPoint key={'RPoint-' + point.id} point={point} hit={hit} />);
+            }
         }
 
         return (
             <CanvasContext.Provider value={{ctx: this.cContext}}>
-                <canvas ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}>{shapes}</canvas>
+                <canvas className={'appCanvas'} ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}>{shapes}</canvas>
             </CanvasContext.Provider>
         );
     }

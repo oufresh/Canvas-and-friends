@@ -18,7 +18,7 @@ export function drawPointProcessor(clickSubj: rxjs.Subject<CanvasPosition>) {
     return clickSubj.pipe(operators.map((pos: CanvasPosition) => {
         return {
             type: ShapeTypes.POINT,
-            shape: new Point("AAA", pos[0], pos[1])
+            shape: new Point('AAA', pos[0], pos[1])
         };
     }));
 }
