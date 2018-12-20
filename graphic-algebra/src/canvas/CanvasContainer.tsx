@@ -14,6 +14,7 @@ export interface CanvasContainerProps {
     drawingType: ShapeTypes;
     className?: string;
     hoverActive?: boolean;
+    delete: boolean;
 }
 
 // mouse hit ora è un unico campo poi diventerà lo style che cambia
@@ -25,7 +26,6 @@ interface CanvasContainerState {
     mouseClickPos: Array<number>;
     currentShape: string;
     mouseHits: MouseHits;
-    delete: boolean;
 }
 
 const mouseHoverFilter = (hoverActive?: boolean) => (hoverActive !== undefined && hoverActive === true);
@@ -56,14 +56,14 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             shapes: createInitCanvasShapes(),
             mouseHits: {
                 hits: new Set()
-            },
-            delete: false
+            }
         };
         this.onMove = null;
         this.onMoveSub = null;
 
         this.onDrawShapeObs = null;
         this.onDrawShapeSub = null;
+
         this.onDeleteShapeObs = null;
         this.onDeleteShapeSub = null;
 
@@ -99,6 +99,13 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
 
     componentWillUnmount() {
         // togliere tutte le subscribe
+    }
+
+    _setDrawingInteraction() {
+        if (this.props.delete === true) {
+            this.onDeleteShapeObs = null;
+            this.onDeleteShapeSub = null;
+        }
     }
 
     componentDidUpdate(prevProps: CanvasContainerProps) {
@@ -156,14 +163,14 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
     }
 }
 /*
-        const line = new ExpLine(new Point(100, 100), new Point(300, 500), 10);
-        // const pol = new Polyline(new Point(10,10), new Point(150,110));
-        // pol.addPoint(new Point(100, 100), 1);
-        // const point = new Point(200, 200);
+const line = new ExpLine(new Point(100, 100), new Point(300, 500), 10);
+// const pol = new Polyline(new Point(10,10), new Point(150,110));
+// pol.addPoint(new Point(100, 100), 1);
+// const point = new Point(200, 200);
 
-        const pol = new Polygon();
-        pol.pushVertex([350, 50]);
-        pol.pushVertex([650, 100]);
-        pol.pushVertex([785, 150]);
-        pol.pushVertex([450, 120]);
-        pol.pushVertex([350, 140]);*/
+const pol = new Polygon();
+pol.pushVertex([350, 50]);
+pol.pushVertex([650, 100]);
+pol.pushVertex([785, 150]);
+pol.pushVertex([450, 120]);
+pol.pushVertex([350, 140]);*/

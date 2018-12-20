@@ -5,7 +5,7 @@ import { pointInCircle } from '../collisions/pointInCircle';
 export type MouseHitEvent = {
     pos: CanvasPosition,
     shapeType: ShapeTypes,
-    shapeId: string
+    mouseHits: MouseHits
 };
 
 export type MouseHits = {

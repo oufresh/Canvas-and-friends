@@ -1,13 +1,35 @@
 import * as rxjs from 'rxjs';
 import * as operators from 'rxjs/operators';
 import { CanvasPosition } from './types';
-import { ShapeTypes } from './canvasShapes';
+import { ShapeTypes, CanvasShapes } from './canvasShapes';
 import { Shape } from '../shapes/base';
 import { Point } from '../shapes/point';
+import { MouseHits, collisionProcessor } from './canvasCollisions';
 
-/*export function setDrawingManager(drawingType: ShapeTypes) {
-    
-}*/
+export function deleteShapeProcessor(drawingType: ShapeTypes, shapes: CanvasShapes, clickSubj: rxjs.Subject<CanvasPosition>, moveSubj: rxjs.Subject<CanvasPosition>, onMouseHitObs: rxjs.Observable<MouseHits>) {
+    if (onMouseHitObs) {
+        return onMouseHitObs.pipe(
+            operators.filter((mouseHits: MouseHits) => {
+
+            }),
+            operators.switchMap((mouseHits: MouseHits) => {
+                // quando c'è un hit con dopo un click allora posso fare il delete se la shape è del tipo che voglio cancellare
+                return clickSubj.pipe()
+            }));
+        }));
+    } else {
+
+    }
+
+
+    return clickSubj.pipe(operators.map((pos: CanvasPosition) => {
+        if (onMouseHitObs) {
+
+        } else {
+            const hit = collisionProcessor(pos, shapes);
+        }
+    });
+}
 
 export interface Drawing {
     type: ShapeTypes;
