@@ -10,25 +10,18 @@ export function deleteShapeProcessor(drawingType: ShapeTypes, shapes: CanvasShap
     if (onMouseHitObs) {
         return onMouseHitObs.pipe(
             operators.filter((mouseHits: MouseHits) => {
-
+                return mouseHits.hits.size > 0;
             }),
             operators.switchMap((mouseHits: MouseHits) => {
                 // quando c'è un hit con dopo un click allora posso fare il delete se la shape è del tipo che voglio cancellare
-                return clickSubj.pipe()
+                // return clickSubj.pipe()
             }));
-        }));
     } else {
-
+        return clickSubj.pipe(
+            operators.switchMap((pos: CanvasPosition) => {
+                return collisionProcessor(pos, shapes);
+        }));
     }
-
-
-    return clickSubj.pipe(operators.map((pos: CanvasPosition) => {
-        if (onMouseHitObs) {
-
-        } else {
-            const hit = collisionProcessor(pos, shapes);
-        }
-    });
 }
 
 export interface Drawing {

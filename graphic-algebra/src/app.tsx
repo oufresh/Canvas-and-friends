@@ -84,7 +84,7 @@ class App extends React.Component<any, AppState> {
                     <Navbar collapsible={true}>
                         <NavButtons drawingType={this.state.drawingType} onClick={this.onChangeShape} />
                     </Navbar>
-                    <CanvasContainer className={'appResize'} drawingType={this.state.drawingType} hoverActive={true}/>
+                    <CanvasContainer className={'appResize'} drawingType={this.state.drawingType} hoverActive={true} delete={true} />
                 </div>
             </div>
         );
