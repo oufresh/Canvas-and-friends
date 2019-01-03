@@ -6,18 +6,28 @@
 
 The collision of a point and a circle is quite simple. We need to calculate the distance from the point and the center of the circle. If it's smaller or equal the radius the collision is true.
 
-$D=\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}$
+The formula to calculate the generic distance between two points is
 
-```javascript
-if(D <= r)
-    return true;
-else
-    return false;
-```
+$$\bold{D=\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}}$$
+<br>
+
+now we can test the condition $\bold{D \le r}$ to have the result.
+
 
 ### Point and line
 
-We can calculate the distance $\bold{|C-P_1|}$ and $\bold{|P_2-C|}$ and compare it with $\bold{|P_2-P_1|}$. 
+Suppose to have a line from the point **P1** to the point **P2** and another point **C**. We want to know if the point is on the line.
+Let's start calculating the distance $\bold{d1 = |C-P_1|}$ and $\bold{d2 = |P_2-C|}$ and compare it with $\bold{d = |P_2-P_1|}$. If the distance of the points is equal to the sum $\bold{d = d1 + d2}$ the point is on the line.
+
+It's useful to define a tolerance because of pixel approximation to detect the collision. Let's call it **T**; the higher it is the less accurate is the result. In our code the value is 0.1.
+
+The conditon will be:
+
+$$\bold{(d - T) \le (d1 + d2) \le (d + T)}$$
+<br>
+
+![Alt text](./pointAndLine.svg)
+<img src="./pointAndLine.svg">
 
 ### Circle and line
 
