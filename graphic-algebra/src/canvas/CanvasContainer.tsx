@@ -4,7 +4,7 @@ import { ResizeController, ResizeEvent } from '../lib/ui/resize/ResizeController
 import { Canvas } from './Canvas';
 import { CanvasLogger } from '../lib/ui/canvasLogger/CanvasLogger';
 import { CanvasPosition } from './types';
-import { Drawing, createDrawingEventProcessor } from './drawings';
+import { Drawing, createDrawingEventProcessor, deleteShapeProcessor } from './drawings';
 import * as rxjs from 'rxjs';
 import * as operators from 'rxjs/operators';
 import { Point } from '../shapes/point';
@@ -69,6 +69,8 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
 
         this.onMouseHitObs = null;
         this.onMouseHitSub = null;
+
+        this._onDeleting = this._onDeleting.bind(this);
     }
 
     componentDidMount() {
@@ -95,6 +97,9 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
         if (this.onDrawShapeObs) {
             this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
         }
+
+        this.onDeleteShapeObs = deleteShapeProcessor(this.clickSubj, this.moveSubj, this.onMouseHitObs);
+        this.onDeleteShapeSub = this.onDeleteShapeObs.subscribe(this._onDeleting);
     }
 
     componentWillUnmount() {
@@ -139,6 +144,10 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
                 currentShape: ds.shape.id
             });
         }
+    }
+
+    _onDeleting(mouseHits: MouseHits) {
+        console.log(mouseHits);
     }
 
     render() {

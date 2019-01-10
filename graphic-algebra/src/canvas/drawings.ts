@@ -14,7 +14,9 @@ export function deleteShapeProcessor(/*drawingType: ShapeTypes, shapes: CanvasSh
             }),
             operators.switchMap((mouseHits: MouseHits) => {
                 // quando c'è un hit con dopo un click allora posso fare il delete se la shape è del tipo che voglio cancellare
-                return clickSubj;
+                return clickSubj.pipe(operators.map(() => {
+                    return mouseHits;
+                }));
             }));
     /*} else {
         return clickSubj.pipe(
