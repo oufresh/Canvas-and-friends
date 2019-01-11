@@ -26,6 +26,7 @@ interface CanvasContainerState {
     mouseClickPos: Array<number>;
     currentShape: string;
     mouseHits: MouseHits;
+    delete: boolean;
 }
 
 const mouseHoverFilter = (hoverActive?: boolean) => (hoverActive !== undefined && hoverActive === true);
@@ -53,6 +54,7 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             mousePos: [0, 0],
             mouseClickPos: [0, 0],
             currentShape: '',
+            delete: false,
             shapes: createInitCanvasShapes(),
             mouseHits: {
                 hits: new Set()
@@ -91,26 +93,24 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
         this.onMouseHitSub = this.onMouseHitObs.subscribe((mouseHits: MouseHits) => {
             this.setState({ mouseHits });
         });
-
-        // da cambiare con la delete se cambia la prop delete nell'update
-        this.onDrawShapeObs = createDrawingEventProcessor(this.props.drawingType, this.clickSubj, this.moveSubj);
-        if (this.onDrawShapeObs) {
-            this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
-        }
-
-        this.onDeleteShapeObs = deleteShapeProcessor(this.clickSubj, this.moveSubj, this.onMouseHitObs);
-        this.onDeleteShapeSub = this.onDeleteShapeObs.subscribe(this._onDeleting);
-    }
-
-    componentWillUnmount() {
-        // togliere tutte le subscribe
     }
 
     _setDrawingInteraction() {
         if (this.props.delete === true) {
             this.onDeleteShapeObs = null;
             this.onDeleteShapeSub = null;
+            this.onDeleteShapeObs = deleteShapeProcessor(this.clickSubj, this.moveSubj, this.onMouseHitObs);
+            this.onDeleteShapeSub = this.onDeleteShapeObs.subscribe(this._onDeleting);
+        } else {
+            this.onDrawShapeObs = createDrawingEventProcessor(this.props.drawingType, this.clickSubj, this.moveSubj);
+            if (this.onDrawShapeObs) {
+                this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
+            }
         }
+    }
+
+    componentWillUnmount() {
+        // togliere tutte le subscribe
     }
 
     componentDidUpdate(prevProps: CanvasContainerProps) {
@@ -164,7 +164,7 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
                         mousePos={this.state.mousePos}
                         mouseHits={this.state.mouseHits}
                     />
-                    <CanvasLogger mouseCoords={this.state.mousePos} mouseClickPos={this.state.mouseClickPos}/>
+                    <CanvasLogger mouseCoords={this.state.mousePos} mouseClickPos={this.state.mouseClickPos} delete={this.state.delete} />
                 </React.Fragment> : <h3>Preparing ...</h3>
             }
             </ResizeController>
