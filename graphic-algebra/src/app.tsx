@@ -65,6 +65,8 @@ class App extends React.Component<any, AppState> {
         };
 
         this.onDeleteActive = null;
+
+        this._initDeleteEvent = this._initDeleteEvent.bind(this);
     }
 
     componentDidMount() {
@@ -72,11 +74,12 @@ class App extends React.Component<any, AppState> {
     }
 
     _initDeleteEvent() {
+        const that = this;
         this.onDeleteActive = rxjs.merge(
             rxjs.fromEvent(document, 'keydown').pipe(operators.filter((e: Event) => {
                     const ke = e as KeyboardEvent;
                     if (ke) {
-                        return (ke.keyCode === 16 && ke.type === 'keydown' && ke.location === 1 && this.state.delete === false);
+                        return (ke.keyCode === 16 && ke.type === 'keydown' && ke.location === 1 && that.state.delete === false);
                     } else {
                         return false;
                     }
