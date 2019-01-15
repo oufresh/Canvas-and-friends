@@ -8,7 +8,7 @@ import { pointInCircle } from '../collisions/pointInCircle';
 import { Point } from '../shapes/point';
 import { pointInPolygon } from '../collisions/pointInPolygon';
 import * as Shape2Draw from './shape2Draw';
-import { CanvasShapes } from './canvasShapes';
+import { CanvasShapes, ShapeTypes } from './canvasShapes';
 import { CanvasPosition } from './types';
 import { MouseHits } from './canvasCollisions';
 
@@ -173,7 +173,8 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         const shapes = [];
         if (this.state.ready === true) {
             for (let point of this.props.shapes.points.values()) {
-                const hit = this.props.mouseHits.hits.has(point.id); // pointInCircle(point.x, point.y, this.props.mousePos[0], this.props.mousePos[1], 3);
+                const hitPoints = this.props.mouseHits.hits.get(ShapeTypes.POINT);
+                const hit = hitPoints !== undefined ? hitPoints.has(point.id) : false;
                 shapes.push(<PCPoint key={'RPoint-' + point.id} point={point} hit={hit} />);
             }
         }

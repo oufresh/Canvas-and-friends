@@ -55,7 +55,7 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             currentShape: '',
             shapes: createInitCanvasShapes(),
             mouseHits: {
-                hits: new Set()
+                hits: new Map()
             }
         };
         this.onMove = null;
@@ -80,8 +80,6 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
                 mousePos: pos
             });
         });
-
-        // dovrà essere disattivabile hover con un flag di stato/props
 
         this.onMouseHitObs = this.moveSubj.pipe(operators.filter((pos: CanvasPosition) => {
             return (this.props.hoverActive !== undefined && this.props.hoverActive === true);
@@ -160,7 +158,23 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
     }
 
     _onDeleting(mouseHits: MouseHits) {
-        console.log(mouseHits);
+        // console.log('Delete detected');
+        // console.log(mouseHits);
+        const points: Set<string> | undefined = mouseHits.hits.get(ShapeTypes.POINT);
+        if (points && points.size) {
+            const shapes = this.state.shapes;
+            let currentShape = this.state.currentShape;
+            points.forEach((pId: string) => {
+                shapes.points.delete(pId);
+                if (currentShape === pId) {
+                    currentShape = '';
+                }
+            });
+            this.setState({
+                shapes,
+                currentShape
+            });
+        }
     }
 
     render() {
