@@ -10,7 +10,6 @@
     },
     "typescript.tsdk": "node_modules\\typescript\\lib",
     "mdmath.delimiters": "dollars",
-    "svg.preview.background": "transparent",
     "typescript.validate.enable": true,
     "javascript.validate.enable": true
 }
