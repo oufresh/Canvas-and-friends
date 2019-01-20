@@ -9,19 +9,21 @@ export type MouseHitEvent = {
 };
 
 export type MouseHits = {
-    hits: Set<string>;
+    hits: Map<ShapeTypes, Set<string>>;
 };
 
 export function collisionProcessor(pos: CanvasPosition, shapes: CanvasShapes): MouseHits {
     let ret: MouseHits = {
-        hits: new Set()
+        hits: new Map()
     };
 
     for (let point of shapes.points.values()) {
+        const hps = new Set();
         const hit = pointInCircle(point.x, point.y, pos[0], pos[1], 3);
         if (hit === true) {
-            ret.hits.add(point.id);
+            hps.add(point.id);
         }
+        ret.hits.set(ShapeTypes.POINT, hps);
     }
     
     return ret;

@@ -4,7 +4,7 @@ import { ResizeController, ResizeEvent } from '../lib/ui/resize/ResizeController
 import { Canvas } from './Canvas';
 import { CanvasLogger } from '../lib/ui/canvasLogger/CanvasLogger';
 import { CanvasPosition } from './types';
-import { Drawing, createDrawingEventProcessor } from './drawings';
+import { Drawing, createDrawingEventProcessor, deleteShapeProcessor } from './drawings';
 import * as rxjs from 'rxjs';
 import * as operators from 'rxjs/operators';
 import { Point } from '../shapes/point';
@@ -55,7 +55,7 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             currentShape: '',
             shapes: createInitCanvasShapes(),
             mouseHits: {
-                hits: new Set()
+                hits: new Map()
             }
         };
         this.onMove = null;
@@ -69,6 +69,8 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
 
         this.onMouseHitObs = null;
         this.onMouseHitSub = null;
+
+        this._onDeleting = this._onDeleting.bind(this);
     }
 
     componentDidMount() {
@@ -79,8 +81,6 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             });
         });
 
-        // dovrà essere disattivabile hover con un flag di stato/props
-
         this.onMouseHitObs = this.moveSubj.pipe(operators.filter((pos: CanvasPosition) => {
             return (this.props.hoverActive !== undefined && this.props.hoverActive === true);
         }), operators.map((pos: CanvasPosition) => {
@@ -90,10 +90,30 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             this.setState({ mouseHits });
         });
 
-        // da cambiare con la delete se cambia la prop delete nell'update
-        this.onDrawShapeObs = createDrawingEventProcessor(this.props.drawingType, this.clickSubj, this.moveSubj);
-        if (this.onDrawShapeObs) {
-            this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
+        this._setDrawingInteraction();
+    }
+
+    _setDrawingInteraction() {
+        if (this.props.delete === true) {
+            if (this.onDeleteShapeObs === null) {
+                this.onDeleteShapeObs = deleteShapeProcessor(this.clickSubj, this.moveSubj, this.onMouseHitObs);
+            }
+            if (this.onDeleteShapeObs) {
+                this.onDeleteShapeSub = this.onDeleteShapeObs.subscribe(this._onDeleting);
+            }
+            if (this.onDrawShapeSub) {
+                this.onDrawShapeSub.unsubscribe();
+            }
+        } else {
+            if (this.onDrawShapeObs === null) {
+                this.onDrawShapeObs = createDrawingEventProcessor(this.props.drawingType, this.clickSubj, this.moveSubj);
+            }
+            if (this.onDrawShapeObs) {
+                this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
+            }
+            if (this.onDeleteShapeSub) {
+                this.onDeleteShapeSub.unsubscribe();
+            }
         }
     }
 
@@ -101,17 +121,13 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
         // togliere tutte le subscribe
     }
 
-    _setDrawingInteraction() {
-        if (this.props.delete === true) {
-            this.onDeleteShapeObs = null;
-            this.onDeleteShapeSub = null;
-        }
-    }
-
     componentDidUpdate(prevProps: CanvasContainerProps) {
-        if (prevProps.drawingType !== this.props.drawingType) {
-            console.log('componentDidUpdate');
+        if (prevProps.delete !== this.props.delete) {
+            this._setDrawingInteraction();
         }
+        /*if (prevProps.drawingType !== this.props.drawingType) {
+            console.log('componentDidUpdate');
+        }*/
     }
 
     onCanvasResize = (re: ResizeEvent) => {
@@ -141,6 +157,26 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
         }
     }
 
+    _onDeleting(mouseHits: MouseHits) {
+        // console.log('Delete detected');
+        // console.log(mouseHits);
+        const points: Set<string> | undefined = mouseHits.hits.get(ShapeTypes.POINT);
+        if (points && points.size) {
+            const shapes = this.state.shapes;
+            let currentShape = this.state.currentShape;
+            points.forEach((pId: string) => {
+                shapes.points.delete(pId);
+                if (currentShape === pId) {
+                    currentShape = '';
+                }
+            });
+            this.setState({
+                shapes,
+                currentShape
+            });
+        }
+    }
+
     render() {
         return (
         <ResizeController className={this.props.className} onResize={this.onCanvasResize}>
@@ -155,7 +191,7 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
                         mousePos={this.state.mousePos}
                         mouseHits={this.state.mouseHits}
                     />
-                    <CanvasLogger mouseCoords={this.state.mousePos} mouseClickPos={this.state.mouseClickPos}/>
+                    <CanvasLogger mouseCoords={this.state.mousePos} mouseClickPos={this.state.mouseClickPos} delete={this.props.delete} />
                 </React.Fragment> : <h3>Preparing ...</h3>
             }
             </ResizeController>

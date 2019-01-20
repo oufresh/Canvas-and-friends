@@ -6,22 +6,27 @@ import { Shape } from '../shapes/base';
 import { Point } from '../shapes/point';
 import { MouseHits, collisionProcessor } from './canvasCollisions';
 
-export function deleteShapeProcessor(/*drawingType: ShapeTypes, shapes: CanvasShapes, */clickSubj: rxjs.Subject<CanvasPosition>, moveSubj: rxjs.Subject<CanvasPosition>, onMouseHitObs: rxjs.Observable<MouseHits>) {
-    // if (onMouseHitObs) {
+export function deleteShapeProcessor(/*drawingType: ShapeTypes, shapes: CanvasShapes, */clickSubj: rxjs.Subject<CanvasPosition>, moveSubj: rxjs.Subject<CanvasPosition>, onMouseHitObs: rxjs.Observable<MouseHits> | null) {
+    if (onMouseHitObs) {
         return onMouseHitObs.pipe(
             operators.filter((mouseHits: MouseHits) => {
                 return mouseHits.hits.size > 0;
             }),
             operators.switchMap((mouseHits: MouseHits) => {
                 // quando c'è un hit con dopo un click allora posso fare il delete se la shape è del tipo che voglio cancellare
-                return clickSubj;
+                return clickSubj.pipe(operators.map(() => {
+                    return mouseHits;
+                }));
             }));
-    /*} else {
-        return clickSubj.pipe(
+    } else {
+        // TODO da fare la collision se disabilitata di default
+        /*return clickSubj.pipe(
             operators.switchMap((pos: CanvasPosition) => {
                 return collisionProcessor(pos, shapes);
-        }));
-    }*/
+        }));*/
+
+        return null;
+    }
 }
 
 export interface Drawing {
