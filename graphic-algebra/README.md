@@ -8,8 +8,9 @@ The collision of a point and a circle is quite simple. We need to calculate the 
 
 The formula to calculate the generic distance between two points is
 
-$\bold{D=\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}}$
-<br>
+$$
+\bold{D=\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}}
+$$
 
 now we can test the condition $\bold{D \le r}$ to have the result.
 
