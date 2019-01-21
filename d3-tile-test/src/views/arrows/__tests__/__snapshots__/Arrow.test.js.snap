@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ArrowUp renders without a crash  1`] = `
+<styled.svg
+  onClick={[Function]}
+  style={
+    Object {
+      "cursor": "pointer",
+      "left": 100,
+      "position": "absolute",
+      "top": 100,
+    }
+  }
+>
+  <path
+    d="M22.086 20.914l2.829-2.829-8.914-8.914-8.914 8.914 2.828 2.828 6.086-6.086z"
+  />
+</styled.svg>
+`;

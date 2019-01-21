@@ -1,5 +1,7 @@
 {
-	"transform": {
-	  "^.+\\.js$": "<rootDir>/jest.transform.js"
-	}
+  "transform": {
+    "^.+\\.js$": "<rootDir>/jest.transform.js"
+  },
+  "snapshotSerializers": ["enzyme-to-json/serializer"],
+  "setupTestFrameworkScriptFile": "<rootDir>/src/setupTests.js"
 }

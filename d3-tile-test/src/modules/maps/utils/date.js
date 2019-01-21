@@ -1,4 +1,4 @@
 //@flow
-export const now = ():number =>{
-    return new Date().getTime();
-}
+export const now = (): number => {
+  return new Date().getTime();
+};

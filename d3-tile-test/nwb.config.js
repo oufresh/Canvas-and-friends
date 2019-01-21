@@ -2,15 +2,10 @@ module.exports = {
   type: 'react-component',
   npm: {
     esModules: true,
-    umd: {
-      global: 'STWEBD3',
-      externals: {
-        react: 'React'
-      }
-    }
+    umd: false
   },
   babel: {
-	plugins: 'transform-flow-strip-types'
+    plugins: 'transform-flow-strip-types'
   },
   devServer: {
     proxy: {

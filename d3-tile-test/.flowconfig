@@ -1,0 +1,16 @@
+[ignore]
+<PROJECT_ROOT>/lib/*
+<PROJECT_ROOT>/es/*
+<PROJECT_ROOT>/demo/*
+.*/flow-typed/*
+.*/node_modules/nwb/*
+.*/node_modules/findup/*
+
+
+[include]
+
+[libs]
+
+[options]
+
+[lints]

@@ -1,16 +1,32 @@
 //@flow
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
 
-const SvgDiv = styled.div`
-    position: absolute;
-    top: ${props => (props.top ? props.top : 0) + 'px'};
-    left: ${props => (props.left ? props.left: 0) + 'px' };
-    overflow: hidden;
-    pointer-events: all;
-    width: ${props => props.width + 'px'};
-    height: ${props => props.height + 'px'};
-    background-color: ${props => props.backgroundColor ? props.backgroundColor: 'rgba(0,0,0,1)'};
-`;
+const SvgDiv = ({
+  top,
+  left,
+  width,
+  height,
+  backgroundColor,
+  children
+}: {
+  top?: number,
+  left?: number,
+  width: number,
+  height: number,
+  backgroundColor?: string,
+  children: any
+}) => {
+  const style = {
+    position: "absolute",
+    top: (top ? top : 0) + "px",
+    left: (left ? left : 0) + "px",
+    overflow: "hidden",
+    pointerEvents: "all",
+    width: width + "px",
+    height: height + "px",
+    backgroundColor: backgroundColor ? backgroundColor : "rgba(0,0,0,1)"
+  };
+  return <div style={style}>{children}</div>;
+};
 
 export { SvgDiv };

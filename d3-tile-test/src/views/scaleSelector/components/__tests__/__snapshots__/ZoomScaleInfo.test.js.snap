@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ZoomScaleInfo Component renders without a crash  1`] = `
+<styled.div>
+  <styled.div
+    id="zoom-line-container"
+  >
+    <styled.div
+      id="zoom-text-label"
+    >
+      ZOOM 
+    </styled.div>
+    <styled.div
+      id="zoom-first-extreme-line"
+    />
+    <styled.div
+      id="zoom-main-line"
+    />
+    <styled.div
+      id="zoom-second-extreme-line"
+    />
+    <styled.div
+      id="zoom-target-line"
+      left={106.612}
+    />
+    <styled.label
+      left={106.612}
+    >
+       
+      4.5
+       
+    </styled.label>
+  </styled.div>
+</styled.div>
+`;

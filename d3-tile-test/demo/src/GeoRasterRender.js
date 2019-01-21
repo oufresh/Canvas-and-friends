@@ -1,101 +1,113 @@
-import React from 'react';
-import styled from 'styled-components';
-import { connect } from 'react-redux';
+/*eslint no-magic-numbers:*/
+/* eslint react/prop-types: 0 */
+import React from "react";
+import styled from "styled-components";
+import { connect } from "react-redux";
 
-import GeoTileRender from '../../src/views/tile/components/GeoTileRender';
-import { moveTile, initTile } from '../../src/modules/maps';
-import { getMapsTilesByUuid, getViewPortSizeByUuid, getMapScaleByUuid /*, getMapSizeByUuid*/ } from '../../src/modules/maps';
-import RasterTile from '../../src/views/tile/components/RasterTile';
-import { type RenderTileArg } from '../../src/views/tile/components/types';
-import { getOSMUrl } from '../../src/modules/maps/utils/geoRenderUtils';
-
+import { GeoTileRender } from "../../src/views";
+import {
+  getMapsTilesByUuid,
+  getViewPortSizeByUuid,
+  getScalesByUuid,
+  getMercatorProjection,
+  getRenderModalityByUuid,
+  zoomMap,
+  initMap,
+  getReferenceSystemScalesByUuid,
+  GEO_RENDER_MODALITY
+} from "../../src/modules";
 
 const MapContainer = styled.div`
-    position: relative;
-    width: 100vw;
-    height: 100vh;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
 `;
 
 const viewPortWidth = 1280;
 const viewPortHeight = 600;
 
-const defaultCenter:Array<number> = [9, 45];
-const defaultScaleExtent:Array<number> = [1 << 8, 1 << 18];
-const defaultInitScale:number = 1 << 14;
+const defaultCenter = [9, 45];
+const defaultScaleExtent = [1 << 8, 1 << 18];
+const defaultInitScale = 1 << 14;
 
-type GeoRasterRenderPropsType = {
-    width?: number,
-    height?: number,
-    moveTile: Function,
-    scale: number,
-    translate: Array,
-    tiles: Array,
-    initTile: Function,
-    viewPortSize: Map,
-    scales: Map
+function calculateCenter(center) {
+  const projection = getMercatorProjection();
+  const p = projection(center);
+  return [-p[0], -p[1]];
+}
+
+function urlBuilder(p) {
+  return "http://" + "abc"[p.x % 3] + ".tile.openstreetmap.org/" + p.zoomIndex + "/" + p.x + "/" + p.y + ".png";
+}
+
+class GeoRasterRender extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      viewportObjectPosition: {
+        scaledObjectTranslation: calculateCenter(defaultCenter),
+        viewport: [0, 0],
+        objectExpScale: defaultInitScale
+      }
+    };
+  }
+
+  onZoomed = zoom => {
+    if (this.props.zoomMap) {
+      this.props.zoomMap(zoom);
+    }
+  };
+
+  componentDidMount() {
+    this.props.initMap({
+      uuid: "Prova",
+      viewPortWidth,
+      viewPortHeight,
+      defaultExpScale: defaultInitScale,
+      expScaleOffset: 0,
+      initExpScale: defaultInitScale,
+      minExpScale: defaultScaleExtent[0],
+      maxExpScale: defaultScaleExtent[1],
+      renderModality: GEO_RENDER_MODALITY
+    });
+  }
+
+  render() {
+    const tiles = this.props.tiles.get("Prova");
+    const viewPortSize = this.props.viewPortSize.get("Prova");
+    const renderModality = this.props.renderModality.get("Prova");
+    const scales = this.props.scales.get("Prova");
+    return (
+      <MapContainer>
+        <GeoTileRender
+          height={viewPortSize ? viewPortSize.viewPortHeight : 0}
+          viewportObjectPosition={this.state.viewportObjectPosition}
+          onZoomed={this.onZoomed}
+          renderModality={renderModality}
+          baseTileUrl={""}
+          tileUrlBuilder={urlBuilder}
+          scales={scales}
+          tiles={tiles}
+          uuid={"Prova"}
+          width={viewPortSize ? viewPortSize.viewPortWidth : 0}
+        />
+      </MapContainer>
+    );
+  }
+}
+
+const mapStateToProps = state => {
+  return {
+    tiles: getMapsTilesByUuid(state),
+    viewPortSize: getViewPortSizeByUuid(state),
+    scales: getScalesByUuid(state),
+    referenceSystem: getReferenceSystemScalesByUuid(state),
+    renderModality: getRenderModalityByUuid(state)
+  };
 };
 
-const renderTile = (t: RenderTileArg) => <RasterTile 
-    x={t.x}
-    y={t.y}
-    url={getOSMUrl(t.z, t.x, t.y)}
-    key={`${t.z}${t.x}${t.y}`}
-/>;
-
-class GeoRasterRender extends React.Component<GeoRasterRenderPropsType>
-{
-    constructor(props:GeoRasterRenderPropsType)
-    {
-        super(props);
-        //if (this.props.initTile)
-        //    this.props.initTile("Prova", width, height);
-    }
-
-    onZoomed = (uuid: string, x: number, y: number, k: number) => {
-        if (this.props.moveTile)
-            this.props.moveTile(uuid,x,y,k);
-    }
-
-    componentDidMount()
-    {
-        this.props.initTile("Prova", viewPortWidth, viewPortHeight,
-            defaultScaleExtent[0], defaultScaleExtent[1], defaultInitScale, defaultInitScale);
-    }
-
-    render()
-    {
-        const tiles = this.props.tiles.get("Prova");
-        const viewPortSize = this.props.viewPortSize.get("Prova");
-        const scales = this.props.scales.get("Prova");
-        //const size = this.props.size.get("Prova");
-
-        return(
-            <MapContainer>
-                <GeoTileRender
-                    uuid={"Prova"}
-                    width={viewPortSize?viewPortSize.viewPortWidth:0}
-                    height={viewPortSize?viewPortSize.viewPortHeight:0}
-                    zoomExtent={scales?[scales.minScale, scales.maxScale]:null}
-                    initZoom={scales?scales.initScale:null}
-                    defaultZoom={scales?scales.defaultScale:null}
-                    center={defaultCenter}
-                    tiles={tiles}
-                    onZoomed={this.onZoomed}
-                    renderTile={renderTile}
-                />
-            </MapContainer>
-        );
-    }
-}
-
-const mapStateToProps = (state) => {
-    return {
-        tiles: getMapsTilesByUuid(state),
-        viewPortSize: getViewPortSizeByUuid(state),
-        scales: getMapScaleByUuid(state)/*,
-        size: getMapSizeByUuid(state)*/
-    };
-}
-
 export { GeoRasterRender };
-export default connect(mapStateToProps, { moveTile, initTile })(GeoRasterRender);
+export default connect(
+  mapStateToProps,
+  { zoomMap, initMap }
+)(GeoRasterRender);

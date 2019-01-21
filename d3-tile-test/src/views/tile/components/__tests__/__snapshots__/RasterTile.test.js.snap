@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RasterTile Component renders without a crash with preloaded svg content 1`] = `
+<image
+  height={256}
+  href="testurl"
+  width={256}
+  x={0}
+  y={0}
+/>
+`;

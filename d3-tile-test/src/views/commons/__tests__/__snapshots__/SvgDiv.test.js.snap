@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SvgDiv renders without a crash  1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "rgba(0,0,0,1)",
+      "height": "200px",
+      "left": "0px",
+      "overflow": "hidden",
+      "pointerEvents": "all",
+      "position": "absolute",
+      "top": "0px",
+      "width": "100px",
+    }
+  }
+>
+  <h1>
+    Hello!!
+  </h1>
+</div>
+`;

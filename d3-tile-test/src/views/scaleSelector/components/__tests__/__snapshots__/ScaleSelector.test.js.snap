@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScaleSelector Component renders without a crash  1`] = `
+<ScaleSelector
+  scales={
+    Array [
+      0,
+      1,
+      2,
+      3,
+      4,
+    ]
+  }
+  selectedScale={2}
+  uuid="prova1"
+  visible={true}
+/>
+`;

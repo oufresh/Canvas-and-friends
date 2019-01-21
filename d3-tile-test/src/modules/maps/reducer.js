@@ -1,74 +1,222 @@
 //@flow
-import { List } from 'immutable';
-import { createLeaf, createReducer } from 'stweb-redux-helper';
-import { INIT_TILE, MOVE_TILE } from './actionDefinitions';
-import { type InitTileT, type MoveTileT } from './actionCreators';
-import { initialState, type MapsTileT, TileRecord } from './types';
-import { MOVE_TILE_ERROR }  from './constants';
-import { uuidGenerator, now } from './utils';
+import { createLeaf, createReducer } from "@stweb-lib/redux-helper";
+import update from "immutability-helper";
+import {
+  INIT_MAP,
+  MOVE_MAP,
+  ZOOM_MAP,
+  RESIZE_MAP,
+  REMOVE_MAP,
+  STORE_TILE_MAP
+} from "./actionDefinitions";
+import {
+  type InitMap,
+  type MoveMap,
+  ZoomMap,
+  type ResizeMap,
+  type RemoveMap,
+  StoreTileMap
+} from "./actionCreators";
+import {
+  initialMapsRecord,
+  initialMapRecord,
+  type MapsRecord,
+  TileIndex,
+  TileValue
+} from "./types";
+import { MAP_ERROR } from "./errors";
+import { uuidGenerator, now, serializeTileIndex } from "./utils";
 
-const initTileHandler = (state: MapsTileT, payload: InitTileT): MapsTileT => {
-    const {viewPortWidth, viewPortHeight,initScale, defaultScale, width, height, scales, renderModality} = payload;
-    let { uuid } = payload;
+const initMapHandler = (state: MapsRecord, payload: InitMap): MapsRecord => {
+  let { uuid, initExpScale } = payload;
 
-    //creao l'uuid se non esiste
-    if(!uuid)
-        uuid = uuidGenerator();
-    
-    const existUuid = state.maps.has(uuid);
-    //sovrascrivo il tile esistente
-    if(existUuid) {
-        return state.updateIn(['maps',uuid], tile =>  tile.merge({
-                                                                    viewPortWidth,
-                                                                    viewPortHeight, 
-                                                                    minScale:scales[0], 
-                                                                    maxScale:scales[scales.length-1], 
-                                                                    defaultScale, 
-                                                                    initScale, 
-                                                                    width, 
-                                                                    height, 
-                                                                    scales: List(scales),
-                                                                    renderModality
-                                                                }))
-    }
-    //creao un nuovo tile
-    else{
-        const creationDate = now();
-        const tile = TileRecord({
-            uuid, 
-            viewPortWidth, 
-            viewPortHeight, 
-            creationDate, 
-            minScale:scales[0], 
-            maxScale:scales[scales.length-1], 
-            defaultScale, 
-            initScale, 
-            width, 
-            height, 
-            scales: List(scales),
-            renderModality
-        });
-        return state.setIn(['maps',uuid],tile);
-    }  
+  //creao l'uuid se non esiste
+  if (!uuid) uuid = uuidGenerator();
+
+  const existUuid = state.maps.has(uuid);
+  //sovrascrivo il tile esistente
+  if (existUuid) {
+    //devo fare update in due passi perché $apply al momento non mi ha funzionato
+    const t = state.maps.get(uuid);
+    const objectExpScale = payload.objectExpScale
+      ? payload.objectExpScale
+      : initExpScale;
+    const nt = update(t, {
+      $merge: { ...payload, objectExpScale }
+    });
+
+    return update(state, {
+      maps: {
+        $add: [[uuid, nt]]
+      }
+    });
+
+    //da capire come funziona meglio $apply
+    /*$apply: t => {
+          console.log(t);
+          const objectExpScale = initExpScale;
+          const nt = update(t, {
+            $merge: { ...payload, objectExpScale }
+          });
+          console.log(nt);
+          return nt;
+        }
+      }
+    });*/
+  }
+  //creao un nuovo tile
+  else {
+    const creationDate = now();
+    const objectExpScale = payload.objectExpScale
+      ? payload.objectExpScale
+      : initExpScale;
+    const tile = update(initialMapRecord, {
+      $merge: {
+        ...payload,
+        uuid,
+        creationDate,
+        objectExpScale
+      }
+    });
+
+    return update(state, {
+      maps: {
+        $add: [[uuid, tile]]
+      }
+    });
+
+    //return state.setIn(["maps", uuid], tile);
+  }
 };
 
-const moveTileHandler = (state: MapsTileT, payload: MoveTileT): MapsTileT => {
-    const {uuid, x, y, currentExpScale} = payload;
-    const existUuid = state.maps.has(uuid);
-    if(existUuid){
-        return state.updateIn(['maps',uuid], tile =>  tile.merge({
-            transformX: x,
-            transformY: y,
-            currentExpScale: currentExpScale
-        }))
-    }
-    else{
-        throw new Error(MOVE_TILE_ERROR);
-    } 
+const moveMapHandler = (state: MapsRecord, payload: MoveMap): MapsRecord => {
+  const {
+    uuid,
+    objectExpScale,
+    scaledObjectTranslationX,
+    scaledObjectTranslationY,
+    viewPortTranslationX,
+    viewPortTranslationY,
+    objectPosition
+  } = payload;
+  const existUuid = state.maps.has(uuid);
+  if (existUuid) {
+    const t = state.maps.get(uuid);
+    const nt = update(t, {
+      $merge: {
+        objectExpScale,
+        scaledObjectTranslationX,
+        scaledObjectTranslationY,
+        viewPortTranslationX,
+        viewPortTranslationY,
+        objectPosition
+      }
+    });
 
+    return update(state, {
+      maps: {
+        $add: [[uuid, nt]]
+      }
+    });
+  } else {
+    throw new Error(MAP_ERROR);
+  }
 };
 
-export const maps = createReducer(initialState, [
-    createLeaf(INIT_TILE, initTileHandler),
-    createLeaf(MOVE_TILE, moveTileHandler)
+const zoomMapHandler = (state: MapsRecord, payload: ZoomMap): MapsRecord => {
+  const { uuid, x, y, currentExpScale } = payload;
+  const existUuid = state.maps.has(uuid);
+  if (existUuid) {
+    const t = state.maps.get(uuid);
+    const nt = update(t, {
+      $merge: {
+        transformX: x,
+        transformY: y,
+        currentExpScale
+      }
+    });
+
+    return update(state, {
+      maps: {
+        $add: [[uuid, nt]]
+      }
+    });
+  } else {
+    throw new Error(MAP_ERROR);
+  }
+};
+
+const resizeMapHandler = (
+  state: MapsRecord,
+  payload: ResizeMap
+): MapsRecord => {
+  const { uuid, viewPortWidth, viewPortHeight } = payload;
+  const existUuid = state.maps.has(uuid);
+  if (existUuid) {
+    const t = state.maps.get(uuid);
+    const nt = update(t, {
+      $merge: {
+        viewPortWidth: viewPortWidth,
+        viewPortHeight: viewPortHeight
+      }
+    });
+
+    return update(state, {
+      maps: {
+        $add: [[uuid, nt]]
+      }
+    });
+  } else {
+    throw new Error(MAP_ERROR);
+  }
+};
+
+const removeMapHandler = (
+  state: MapsRecord,
+  payload: RemoveMap
+): MapsRecord => {
+  const { uuid } = payload;
+  const existUuid = state.maps.has(uuid);
+  if (existUuid) {
+    return update(state, {
+      maps: {
+        $remove: [uuid]
+      }
+    });
+  } else {
+    throw new Error(MAP_ERROR);
+  }
+};
+
+const storeTileMapHandler = (state: MapsRecord, payload: StoreTileMap) => {
+  const { uuid, z, x, y, tile, timestamp } = payload;
+  const existUuid = state.maps.has(uuid);
+  if (existUuid) {
+    const t = state.maps.get(uuid);
+    const ti: TileIndex = { z, x, y };
+    const tv: TileValue = { tile, timestamp };
+    const nt = update(t, {
+      tileCacheMap: {
+        $add: [[serializeTileIndex(ti), tv]]
+      }
+    });
+
+    return update(state, {
+      maps: {
+        $add: [[uuid, nt]]
+      }
+    });
+  } else {
+    throw new Error(MAP_ERROR);
+  }
+};
+
+//$FlowFixMe
+export const maps = createReducer(initialMapsRecord, [
+  createLeaf(INIT_MAP, initMapHandler),
+  createLeaf(MOVE_MAP, moveMapHandler),
+  createLeaf(ZOOM_MAP, zoomMapHandler),
+  createLeaf(RESIZE_MAP, resizeMapHandler),
+  createLeaf(REMOVE_MAP, removeMapHandler),
+  createLeaf(STORE_TILE_MAP, storeTileMapHandler)
 ]);

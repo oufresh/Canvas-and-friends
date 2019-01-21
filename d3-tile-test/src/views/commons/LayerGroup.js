@@ -1,21 +1,28 @@
 //@flow
-import React from 'react';
-import { transformToString } from '../utils';
+import React from "react";
+import { transformToString } from "../transforms";
+import { type ZoomTransform } from "../../modules/maps";
 
 type LayerGroupPropsT = {
-    scale: number,
-    translate: Array<number>,
-    svgContent: string
+  transform: ZoomTransform,
+  svgContent: string
 };
 
 const createSvgMarkup = (svg: string) => {
-    return { __html: svg };
-}
+  return { __html: svg };
+};
 
 const LayerGroup = (props: LayerGroupPropsT) => {
-    const content = createSvgMarkup(props.svgContent);
-    const strTr = (props.translate && props.scale) ? transformToString(props.translate[0], props.translate[1], props.scale) : '';
-    return <g transform={strTr} dangerouslySetInnerHTML={content} />;
-}
+  const { transform } = props;
+  const content = createSvgMarkup(props.svgContent);
+  const strTr = transform
+    ? transformToString(
+        transform.transformX ? transform.transformX : 0,
+        transform.transformY ? transform.transformY : 0,
+        transform.currentExpScale ? transform.currentExpScale : 1
+      )
+    : "";
+  return <g transform={strTr} dangerouslySetInnerHTML={content} />;
+};
 
 export { LayerGroup };

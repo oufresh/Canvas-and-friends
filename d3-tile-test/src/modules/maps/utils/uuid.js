@@ -1,6 +1,6 @@
 //@flow
-import uuidV1 from 'uuid/v1';
+import uuidV1 from "uuid/v1";
 
-export const uuidGenerator = ():string =>{
-    return uuidV1();
-}
+export const uuidGenerator = (): string => {
+  return uuidV1();
+};

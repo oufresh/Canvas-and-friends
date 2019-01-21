@@ -1,77 +1,83 @@
-import React from 'react';
-import { TILE_SIZE } from '../../../modules/maps/utils/constants';
+//@flow
+import React from "react";
+import { TILE_SIZE } from "../../../modules";
 
-type SvgTilePropsType = {
-    key: string,
-    x: number,
-    y: number,
-    z: number,
-    svgContent?: string,
-    urlSvgProvider?: Function,
-    getTilePromise?: Promise,
-    opts?: any,
-    baseUrl?: string,
-    width?: number,
-    height?: number
+export type SvgTilePropsType = {
+  svgContent?: string, //da usare in futuro con fetch fatta nel middleware
+  url?: string,
+  x: number,
+  y: number,
+  z: number,
+  tilePromise?: string => Promise<any>
 };
 
-export const defaultHeight: number = TILE_SIZE;
-export const defaultWidth: number = TILE_SIZE;
+/**
+ * Crea l'oggetto per iniettare il markup svg nel componente
+ * @param {string} svg markup della tile
+ */
+const createSvgMarkup = (svg?: string): Object => {
+  return { __html: svg };
+};
 
-const createSvgMarkup = (svg: string) => {
-    return { __html: svg };
-}
+type State = {
+  svgString: string
+};
 
-class SvgTile extends React.PureComponent<SvgTilePropsType>
-{
-    constructor(props: SvgTilePropsType) 
-    {
-        super(props);
-        this.state = {
-            svgString: this.props.svgContent ? this.props.svgContent : ''
-        }
-    }
+/**
+ * Componente React per il rendering delle Tile
+ */
+export class SvgTile extends React.PureComponent<SvgTilePropsType, State> {
+  state: State;
 
-    componentDidMount()
-    {
-        //console.log("SvgTile componentDidMount");
-        if (this.props.urlSvgProvider) {
-            const url = this.props.urlSvgProvider(this.props.z, this.props.x, this.props.y);
-            fetch(url).then(r => {
-                if (r.ok === true)
-                    return r.text();
-                else
-                    throw new Error(r.statusText)
-            }).then(svgString => {
-                //console.log('Received tile: ' + svgString);
-                this.setState({
-                    svgString
-                });
-            }).catch(e => {
-                console.error(e);
+  constructor(props: SvgTilePropsType) {
+    super(props);
+    this.state = {
+      svgString: this.props.svgContent ? this.props.svgContent : ""
+    };
+  }
+
+  componentDidMount() {
+    const { url, tilePromise } = this.props;
+    if (url) {
+      if (tilePromise) {
+        tilePromise(url).then(svgString =>
+          this.setState({
+            svgString
+          })
+        );
+      } else {
+        fetch(url)
+          .then(r => {
+            if (r.ok === true) return r.text();
+            else throw new Error(r.statusText);
+          })
+          .then(svgString => {
+            //console.log('Received tile: ' + svgString);
+            this.setState({
+              svgString
             });
-        }
-        else if (this.props.getTilePromise) {
-            this.props.getTilePromise(this.props.baseUrl, this.props.z, this.props.x, this.props.y, this.props.renderInfo).then(svgString => {
-                //console.log('Received tile: ' + svgString);
-                this.setState({
-                    svgString
-                });
-            }).catch(e => {
-                console.error(e);
-            });
-        }
+          })
+          .catch(e => {
+            /* eslint-disable no-console */
+            console.error(e);
+            /* eslint-enable no-console */
+          });
+      }
     }
+  }
 
-    render()
-    {
-        const h = this.props.height ? this.props.height : defaultHeight;
-        const w = this.props.width ? this.props.width : defaultWidth;
-        const content = createSvgMarkup(this.state.svgString);
-        const transform = 'translate('+ this.props.x*w+' '+ this.props.y*h+')';
-    
-        return <g transform={transform} width={w} height={h} dangerouslySetInnerHTML={content} />;
-    }
+  render() {
+    const content = createSvgMarkup(this.state.svgString);
+    //prettier-ignore
+    const transform = "translate(" + this.props.x * TILE_SIZE + " " + this.props.y * TILE_SIZE + ")";
+
+    return (
+      <g
+        transform={transform}
+        width={TILE_SIZE}
+        height={TILE_SIZE}
+        dangerouslySetInnerHTML={content}
+      />
+    );
+  }
 }
-
-export default SvgTile;

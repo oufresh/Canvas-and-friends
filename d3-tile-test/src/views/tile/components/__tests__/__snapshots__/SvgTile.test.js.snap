@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SvgTile Component renders without a crash with preloaded svg content 1`] = `
+<g
+  dangerouslySetInnerHTML={
+    Object {
+      "__html": "<rect stroke=\\"#000\\" id=\\"svgtest\\" height=\\"254\\" width=\\"254\\" y=\\"1\\" x=\\"1\\" stroke-width=\\"1.5\\" fill=\\"rgba(0,0,0,0)\\"></rect>",
+    }
+  }
+  height={256}
+  transform="translate(0 0)"
+  width={256}
+/>
+`;

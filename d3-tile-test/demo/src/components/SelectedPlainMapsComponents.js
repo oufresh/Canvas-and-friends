@@ -1,69 +1,75 @@
+//@flow
 /*eslint no-magic-numbers:*/
-import React from 'react';
-import PlainTileRender from '../../../src/views/tile/components/PlainTileRender';
-import svgUrlProvider from '../../../src/views/tile/components/svgUrlProvider';
-import SvgTile from '../../../src/views/tile/components/SvgTile';
-import { type RenderTileArg } from '../../../src/views/tile/components/types';
+import React from "react";
+import { PlainTileRender } from "../../../src/views";
 import {
-    type TilesByUuidT,
-    type ViewPortByUuidT,
-    type MapSizeByUuidT,
-    type ScaleByUuidT,
-    type RenderInfoByUuidT
-} from '../../../src/modules';
+  type TilesByUuidT,
+  type ViewPortByUuid,
+  type MapSizeByUuid,
+  type ScaleByUuidT,
+  type RenderModalityBuUuid
+} from "../../../src/modules";
 
-type Props={|
-    renderInfoByUuid:RenderInfoByUuidT,
-    tilesByUuid:TilesByUuidT,
-    viewPortByUuid:ViewPortByUuidT,
-    scalesByUuid:ScaleByUuidT,
-    sizeByUuid:MapSizeByUuidT,
-    selectedMaps:Set<string>,
-    onZoomed:(string,number,number,number)=>void
-|}
+type Props = {|
+  onZoomed: (string, number, number, number) => void,
+  renderModalityByUuid: RenderModalityBuUuid,
+  scalesByUuid: ScaleByUuidT,
+  selectedMaps: Set<string>,
+  sizeByUuid: MapSizeByUuid,
+  tilesByUuid: TilesByUuidT,
+  viewPortByUuid: ViewPortByUuid,
+  viewportObjectPosition: any,
+  objectSizes: Map<string, any>
+|};
 
+const baseTileUrl = "http://localhost:5000/tiles";
+const urlBuilder = p => {
+  return p.baseUrl + "/" + p.zoomIndex + "/" + p.x + "/" + p.y;
+};
 
-const defaultViewportPosition = [0, 0];
-const defaultObjectPosition = [0, 0];
+export const SelectedPlainMapsComponents = ({
+  selectedMaps,
+  viewPortByUuid,
+  tilesByUuid,
+  objectSizes,
+  scalesByUuid,
+  onZoomed,
+  renderModalityByUuid,
+  viewportObjectPosition
+}: Props) => {
 
-const SvgProvidedTile = svgUrlProvider(SvgTile, 'http://localhost:5000/tiles');
+  let i = 0;
+  
+  let ret = []
 
-export const renderTile = (t: RenderTileArg) => <SvgProvidedTile 
-    x={t.x}
-    y={t.y}
-    z={t.z}
-    key={''+t.z+t.x+t.y}
-/>;
+  selectedMaps.forEach(v => {
+    const  k = i;
+    i++;
+    const { viewPortWidth, viewPortHeight } = viewPortByUuid.get(v);
+    const { width: sizeWidth = 0, height: sizeHeight = 0 } = objectSizes.get(v);
+    const scales = scalesByUuid.get(v);
+    const tiles = tilesByUuid.get(v);
+    const renderModality = renderModalityByUuid.get(v);
+    const objectSize = objectSizes.get(v);
+    ret.push(
+      <PlainTileRender
+        key={v}
+        uuid={v}
+        height={viewPortHeight}
+        width={viewPortWidth}
+        left={0 + k * 704}
+        top={0}
+        onZoomed={onZoomed}
+        tiles={tiles}
+        viewportObjectPosition={viewportObjectPosition}
+        scales={scales}
+        objectSize={objectSize}
+        baseTileUrl={baseTileUrl}
+        tileUrlBuilder={urlBuilder}
+        renderModality={renderModality}
+      />
+    );
+  });
 
-export const SelectedPlainMapsComponents = ({selectedMaps,viewPortByUuid,tilesByUuid,sizeByUuid,scalesByUuid,onZoomed,renderInfoByUuid}:Props) =>{
-    return selectedMaps.toJS().map((v,i) => {
-        const {viewPortWidth,viewPortHeight} = viewPortByUuid.get(v);
-        const {width:sizeWidth=0,height:sizeHeight=0} = sizeByUuid.get(v);
-        const scales = scalesByUuid.get(v);
-        const tiles = tilesByUuid.get(v);
-        const renderInfo = renderInfoByUuid.get(v);
-        return ( 
-                <PlainTileRender 
-                    key={v}
-                    uuid={v}
-                    height={viewPortHeight}
-                    width={viewPortWidth} 
-                    left={ 0 + i* 704}
-                    top={0}
-                    objectDefaultZoom={scales?scales.defaultScale:null}
-                    objectHeight={sizeHeight}
-                    objectInitZoom={scales?scales.initScale:null}
-                    objectPosition={defaultObjectPosition}
-                    objectWidth={sizeWidth}
-                    objectZoomExtent={scales?[scales.minScale, scales.maxScale]:null}
-                    onZoomed={onZoomed} 
-                    renderTile={renderTile}
-                    tiles={tiles}
-                    viewportPosition={defaultViewportPosition}
-                    renderInfo={renderInfo}
-                />
-            )
-        }
-    
-    )
-}
+  return ret;
+};

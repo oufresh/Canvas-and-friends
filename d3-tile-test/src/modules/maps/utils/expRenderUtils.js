@@ -1,94 +1,105 @@
-import * as MathJs from 'mathjs';
-import { TILE_SIZE, MIN_D3TILE_EXPONENT, DEFALUT_SCALED_OBJ_TRANSLATION_X, DEFALUT_SCALED_OBJ_TRANSLATION_Y } from './constants';
-import { type ExpRenderInfoT } from './types';
+//@flow
+import * as MathJs from "mathjs";
+import { TILE_SIZE } from "./constants";
+import { calcExpInt } from "./renderUtils";
 
-
-/**
- * Calcola la dimensione scalata nelle coordinate dell'oggetto
- * @param {*} d dimensione da scalare
- * @param {*} dMax dimensione massima dell'oggetto
- */
-export const scaleDimension = (d: number, dMax: number) => d/dMax;
-
-export const ST_DEFAULT_SCALE = 2;
-
-export const log2int = (value) => {
-    return Math.round(MathJs.log2(value));
+export const log2int = (value: number): number => {
+  return Math.round(MathJs.log2(value));
 };
 
 /**
- * Calcolo della scala esponenziale
- * @param {*} exp 
- * @param {*} scale 
- * @param {*} scaleDefault 
+ * Questo valore rappresenta lo scalamento in termini esponenziali base 2
+ * che posso fare ulteriormente alla suddvisione in tiles. Potenzialmente fino ad
+ * arrivare al valore minimo di 1x1 pixels.
+ * Bisogna pensare che l'oggetto di base oltre a suddividerlo in tiles di vari livelli di zoom
+ * può anche essere scalato ulteriormente, restringendo o allargando la tile stessa.
  */
-export const calcExpScale = (exp: number, scale: number, scaleDefault: number, tileSize: number): number => {
-    return Math.pow(2, (exp - (scale - scaleDefault)) + Math.round(MathJs.log2(tileSize)));
-}
-
-export const calcExpInt = (schemaWidth: number, schemaHeight: number) => {
-
-    //prendo la massima dimensione lineare per calcolare il numero
-    //di tiles per contenere l'oggetto
-    const dimension = Math.max(schemaWidth, schemaHeight);
-
-    //calcolo la scala esponenenziale di base:
-    //data la dimensione originale quante tiles ci vogliono
-    //per rappresentarla tutta e ne faccio il logaritmo in base 2.
-
-    const expDouble = MathJs.log2(dimension / TILE_SIZE);
-    //calcolo indice tiles corrispondente alla scala di base
-    return Math.max(MIN_D3TILE_EXPONENT, Math.ceil(expDouble));
-}
+export const baseScaleExp = Math.round(MathJs.log2(TILE_SIZE));
 
 /**
- * Calcola i dati iniziali per il rendering di un modello 2D a tile. Scala esponeziale massima e minima, centro
- * dell'oggetto e scala iniziale.
- * Il punto iniziale è la suddivisione in tile dell'oggetto e vedere quante ne servono. Poi tener conto
- * che ogni livello diverso di zoom implica un raddoppio del numero di tiles per dimensione lineare; da qui usare
- * una scala esponenziale base 2.
- * @param {*} objZoomExtent range di zoom [min, max]
- * @param {*} objInitZoom zoom iniziale
+ * Calcolo della scala esponenziale. La scala viene calcolata tenendo conto sia della suddivisione in tile
+ * sia dello scalamento che posso fare a livello di svg della tile stessa, ovvero baseScaleExp.
+ * Gli epsonenti quindi si sommano ragionando con il logaritmi e corrisponde a moltiplicare i valori
+ * di scala.
+ * @param {*} exp
+ * @param {*} scale
+ * @param {*} scaleDefault
  */
-export const initRenderInfo = (schemaWidth: number, schemaHeight: number, scales: Array<number>, scaleDefault: number, scaleCurrent: number): ExpRenderInfoT => {
-
-    //calcolo indice tiles corrispondente alla scala di base
-    const expInt = calcExpInt(schemaWidth, schemaHeight);
-    
-    //le scale max e min sono invertite in st la 0 è la più ingrandita e la 4la meno ingrandita
-	const expScaleCurrent = calcExpScale(expInt, scaleCurrent, scaleDefault, TILE_SIZE);
-	const expScaleMin = calcExpScale(expInt, scales[scales.length-1], scaleDefault, TILE_SIZE);
-    const expScaleMax = calcExpScale(expInt, scales[0], scaleDefault, TILE_SIZE);
-    const expScaleDefault = calcExpScale(expInt, scaleDefault, scaleDefault, TILE_SIZE);
-    
-    // TODO da spostare nei selettori
-    const maxScaleConv = log2int(expScaleMax/TILE_SIZE);
-
-    return {
-        expScaleExtent: [expScaleMin, expScaleMax],
-        initExpScale: expScaleCurrent,
-        expScaleDefault: expScaleDefault,
-        maxScaleConv: maxScaleConv,
-        schemaWidth: schemaWidth,
-        schemaHeight: schemaHeight,
-        scaleExtent: [scales[0], scales[scales.length-1]]
-    };
+export const calcExpScale = (
+  exp: number,
+  scale: number,
+  scaleDefault: number
+): number => {
+  // prettier-ignore
+  return Math.pow(2, (exp - (scale - scaleDefault)) + baseScaleExp);
 };
 
 /**
- * Calcola la traslazione nelle coordinate scalate dell'oggetto date le coordinate
- * dell'oggetto.
- * @param {*} schemaPoint coordinate del punto dello schema
- * @param {*} width larghezza schema
- * @param {*} height altezza schema
+ * Calcola il fattore di conversione usato ad esempio nelle coordinate
+ * al passaggio di scala dell'oggetto sorgente.
+ * @param {*} objScale scala specifica dell'oggetto, numero intero
+ * @param {*} objScaleDefault scala di default dell'oggetto, numbero intero
  */
-export function calcScaledTranslation(schemaPoint: Array<number>, width: number, height: number): Array<number>
-{
-    const X = scaleDimension(schemaPoint[0], width);
-    const Y = scaleDimension(schemaPoint[1], height);
+export const getFactorForStScale = (
+  objScale: number,
+  objScaleDefault: number
+): number => {
+  return Math.pow(2, objScaleDefault - objScale);
+};
 
-    const DX = DEFALUT_SCALED_OBJ_TRANSLATION_X - X;
-    const DY = DEFALUT_SCALED_OBJ_TRANSLATION_Y - Y;
+/**
+ * calcola il valore della scala dell'oggetto originale intera dato l'indice delle tiles.
+ * @param {*} minObjScale minimo valore di scala originale dell'oggetto
+ * @param {*} maxScaleConv fattore di scala massimo
+ * @param {*} z indice tiles.
+ */
+export const calcObjScaleFromZ = (
+  minObjScale: number,
+  maxScaleConv: number,
+  z: number
+): number => {
+  return Math.round(minObjScale + (maxScaleConv - z));
+};
 
-    return [ DX, DY ];
-}
+/**
+ *Conversione di una scale (ad esempio scala di ST) in scala esponenziale
+ * @param {*} schemaWidth
+ * @param {*} schemaHeight
+ * @param {*} scaleToConvert
+ * @param {*} defaultScale
+ */
+export const calcExpScaleFromScale = (
+  schemaWidth: number,
+  schemaHeight: number,
+  scaleToConvert: number,
+  defaultScale: number
+): number => {
+  //calcolo indice tiles corrispondente alla scala di base
+  const expInt = calcExpInt(schemaWidth, schemaHeight);
+  return calcExpScale(expInt, scaleToConvert, defaultScale);
+};
+
+/**
+ * Formaula inversa di  calcExpScale
+ * @param {*} expInt
+ * @param {*} scale
+ * @param {*} defaultScale
+ */
+export const calcExpScaleInv = (
+  expInt: number,
+  scale: number,
+  expScaleOffset: number
+): number => {
+  // prettier-ignore
+  return expInt +  expScaleOffset + MathJs.log2(TILE_SIZE) - MathJs.log2(scale);
+};
+
+export const calcExpScaleFromScaleInv = (
+  schemaWidth: number,
+  schemaHeight: number,
+  scaleToConvert: number,
+  expScaleOffset: number
+): number => {
+  const expInt = calcExpInt(schemaWidth, schemaHeight);
+  return calcExpScaleInv(expInt, scaleToConvert, expScaleOffset);
+};
