@@ -1,7 +1,7 @@
 import * as rxjs from 'rxjs';
 import * as operators from 'rxjs/operators';
 import { CanvasPosition } from './types';
-import { ShapeTypes, CanvasShapes } from './canvasShapes';
+import { ShapeTypes } from './canvasShapes';
 import { Shape } from '../shapes/base';
 import { Point } from '../shapes/point';
 import { MouseHits, collisionProcessor } from './canvasCollisions';

@@ -4,8 +4,8 @@ import * as glMatrix from 'gl-matrix';
 
 export class ExpLine extends Line {
     expVertex: Array<Point>;
-    constructor(p1: Point, p2: Point, d: number) {
-        super(p1, p2);
+    constructor(id: string, p1: Point, p2: Point, d: number) {
+        super(id, p1, p2);
         this.expVertex = [];
 
         // se fosse orizzontale

@@ -1,7 +1,6 @@
 import { Point } from './point';
 import { Shape } from './base';
 
-
 /**
  * La polyline è difficile poi da rappresentare e anche pixi non sembra avere eventi su questa
  * Quando si disegna è utile fare dei cerchi e rettangoli per avere meglio gli eventi
@@ -32,7 +31,7 @@ export class Polyline implements Shape {
         const dx = dd / Math.cos(alfa);
         const dy = dd / Math.sin(alfa);
 
-        const A: Point = new Point(id+"-S", start.x - dx, start.y - dy);
+        const A: Point = new Point(id + '-S', start.x - dx, start.y - dy);
     }
 
     addPoint(point: Point, index?: number): void {
@@ -58,7 +57,7 @@ export class Polyline implements Shape {
     hit(x: number, y: number): boolean {
         let hit = false;
         for (let i = 0; i < (this.points.length - 1); i++) {
-            const isb = this.isBeetween(this.points[i], this.points[i + 1], new Point("TEMP", x, y));
+            const isb = this.isBeetween(this.points[i], this.points[i + 1], new Point('TEMP', x, y));
             hit = hit || isb;
         }
 

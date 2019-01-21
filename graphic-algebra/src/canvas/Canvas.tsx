@@ -46,26 +46,6 @@ export function withContext<C extends React.ComponentClass>(Component: C): C {
       )) as any as C;
 }
 
-interface PointProps {
-    point?: Point;
-    hit: boolean;
-}
-
-class RPoint extends React.PureComponent<PointProps> {
-    static contextType = CanvasContext;
-    componentDidUpdate() {
-        const ctx = this.context.ctx;
-        if (this.props.point) {
-            Shape2Draw.drawPoint(ctx, this.props.point, this.props.hit);
-        }
-    }
-    render() {
-        return (
-            null
-        );
-    }
-}
-
 class Canvas extends React.Component<CanvasProps, CanvasState> {
     cRef: React.RefObject<HTMLCanvasElement>;
     cContext: CanvasRenderingContext2D | null;
