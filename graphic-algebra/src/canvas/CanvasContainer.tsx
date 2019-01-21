@@ -4,11 +4,12 @@ import { ResizeController, ResizeEvent } from '../lib/ui/resize/ResizeController
 import { Canvas } from './Canvas';
 import { CanvasLogger } from '../lib/ui/canvasLogger/CanvasLogger';
 import { CanvasPosition } from './types';
-import { Drawing, createDrawingEventProcessor, deleteShapeProcessor } from './drawings';
+import { Drawing, deleteShapeProcessor } from './drawings';
 import * as rxjs from 'rxjs';
 import * as operators from 'rxjs/operators';
 import { Point } from '../shapes/point';
 import { MouseHits, collisionProcessor } from './canvasCollisions';
+import { Line } from '../shapes/line';
 
 export interface CanvasContainerProps {
     drawingType: ShapeTypes;
@@ -26,6 +27,7 @@ interface CanvasContainerState {
     mouseClickPos: Array<number>;
     currentShape: string;
     mouseHits: MouseHits;
+    drawingShape: boolean;
 }
 
 const mouseHoverFilter = (hoverActive?: boolean) => (hoverActive !== undefined && hoverActive === true);
@@ -56,7 +58,8 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             shapes: createInitCanvasShapes(),
             mouseHits: {
                 hits: new Map()
-            }
+            },
+            drawingShape: false
         };
         this.onMove = null;
         this.onMoveSub = null;
@@ -93,6 +96,34 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
         this._setDrawingInteraction();
     }
 
+    createDrawingEventProcessor(clickSubj: rxjs.Subject<CanvasPosition>, moveSubj: rxjs.Subject<CanvasPosition>): rxjs.Observable<Drawing> | null {
+        /*if (drawingType === ShapeTypes.POINT) {
+            return drawPointProcessor(clickSubj);
+        } else if 
+        return null;*/
+        return clickSubj.pipe(operators.switchMap((pos: CanvasPosition) => {
+            if (this.state.drawingShape === false) {
+                return moveSubj.pipe(operators.map((mPos: CanvasPosition) => {
+                    const p1: Point = new Point('L1', pos[0], pos[1]);
+                    const p2: Point = new Point('L2', mPos[0], mPos[1]);
+                    return {
+                        type: ShapeTypes.LINE,
+                        shape: new Line('L', p1, p2),
+                        end: false
+                    };
+                }));
+            } else {
+                const p1e: Point = this.state.shapes.lines.get('L').vertex[0];
+                const p2e: Point = new Point('L2', pos[0], pos[1]);
+                return {
+                    type: ShapeTypes.LINE,
+                    shape: new Line('L', p1e, p2e),
+                    end: false
+                };
+            }
+        }));
+    }
+
     _setDrawingInteraction() {
         if (this.props.delete === true) {
             if (this.onDeleteShapeObs === null) {
@@ -106,7 +137,7 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             }
         } else {
             if (this.onDrawShapeObs === null) {
-                this.onDrawShapeObs = createDrawingEventProcessor(this.props.drawingType, this.clickSubj, this.moveSubj);
+                this.onDrawShapeObs = this.createDrawingEventProcessor(this.clickSubj, this.moveSubj);
             }
             if (this.onDrawShapeObs) {
                 this.onDrawShapeSub = this.onDrawShapeObs.subscribe(this._onDrawing);
@@ -154,6 +185,16 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
                 shapes,
                 currentShape: ds.shape.id
             });
+        } else if (ds.type === ShapeTypes.LINE) {
+            const shapes = this.state.shapes;
+            shapes.lines.set(ds.shape.id, ds.shape as Line);
+            this.setState({
+                shapes,
+                currentShape: ds.shape.id,
+                drawingShape: !ds.end
+            });
+        } else {
+            console.log('No shape');
         }
     }
 

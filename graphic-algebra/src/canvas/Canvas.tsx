@@ -86,29 +86,31 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
     }
 
     componentDidUpdate(prevProps: CanvasProps) {
-        /*if (this.cContext) {
+        if (this.cContext) {
             this.clear();
 
             // const ep = new ExpPoint(200, 200, 10);
             // const strokeStyle = p.hit(this.state.mousePos.x, this.state.mousePos.y) === true ? "red" : 'black';
             // console.log(strokeStyle);
-            this.cContext.strokeStyle = strokeStyle;
+            // this.cContext.strokeStyle = strokeStyle;
 
             this.props.shapes.lines.forEach((line: Line) => {
                 if (this.cContext) {
                     Shape2Draw.drawLine(this.cContext, line);
                 }
 
-                if (line instanceof ExpLine) {
+                /*if (line instanceof ExpLine) {
                     const eLine = line as ExpLine;
                     eLine.expVertex.forEach((v: Point, i: number) => {
                         this.drawPoint(v);
                     });
                     // fill in the pixel at (10,10)  
                     // this.cContext.fillRect(eLine.expVertex[1].x, eLine.expVertex[1].y, 1, 1); // fill in the pixel at (10,10)  
-                }
+                }*/
+            });
+        }
             // });
-
+/*
             this.props.shapes.points.forEach((point: Point) => {
                 if (this.cContext) {
                     const hit = pointInCircle(point.x, point.y, this.props.mousePos[0], this.props.mousePos[1], 3);
@@ -131,6 +133,7 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
             });
         }*/
     }
+
     onMouseMove = (e: any) => {
         const pos = getMousePos(this.cRef.current, e);
         if (this.props.onMouseMove) {

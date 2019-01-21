@@ -5,6 +5,7 @@ import { ShapeTypes } from './canvasShapes';
 import { Shape } from '../shapes/base';
 import { Point } from '../shapes/point';
 import { MouseHits, collisionProcessor } from './canvasCollisions';
+import { Line } from '../shapes/line';
 
 export function deleteShapeProcessor(/*drawingType: ShapeTypes, shapes: CanvasShapes, */clickSubj: rxjs.Subject<CanvasPosition>, moveSubj: rxjs.Subject<CanvasPosition>, onMouseHitObs: rxjs.Observable<MouseHits> | null) {
     if (onMouseHitObs) {
@@ -31,6 +32,7 @@ export function deleteShapeProcessor(/*drawingType: ShapeTypes, shapes: CanvasSh
 
 export interface Drawing {
     type: ShapeTypes;
+    end: boolean;
     shape: Shape;
 }
 
@@ -38,14 +40,22 @@ export function drawPointProcessor(clickSubj: rxjs.Subject<CanvasPosition>) {
     return clickSubj.pipe(operators.map((pos: CanvasPosition) => {
         return {
             type: ShapeTypes.POINT,
-            shape: new Point('AAA', pos[0], pos[1])
+            shape: new Point('AAA', pos[0], pos[1]),
+            end: true
         };
     }));
 }
 
-export function createDrawingEventProcessor(drawingType: ShapeTypes, clickSubj: rxjs.Subject<CanvasPosition>, moveSubj: rxjs.Subject<CanvasPosition>): rxjs.Observable<Drawing> | null {
-    if (drawingType === ShapeTypes.POINT) {
-        return drawPointProcessor(clickSubj);
-    }
-    return null;
+export function drawLineProcesso(clickSubj: rxjs.Subject<CanvasPosition>, moveSubj: rxjs.Subject<CanvasPosition>): rxjs.Observable<Drawing> | null {
+    return clickSubj.pipe(operators.switchMap((pos: CanvasPosition) => {
+        return moveSubj.pipe(operators.map((mPos: CanvasPosition) => {
+            const p1: Point = new Point('L1', pos[0], pos[1]);
+            const p2: Point = new Point('L2', mPos[0], mPos[1]);
+            return {
+                type: ShapeTypes.LINE,
+                shape: new Line('L', p1, p2),
+                end: false
+            };
+        }));
+    }));
 }
