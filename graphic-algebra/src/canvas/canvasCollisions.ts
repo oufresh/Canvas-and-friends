@@ -1,4 +1,4 @@
-import { ShapeTypes, CanvasShapes } from './canvasShapes';
+import { DrawTypes, CanvasShapes } from './canvasShapes';
 import { CanvasPosition } from './types';
 import { pointInCircle } from '../collisions/pointInCircle';
 import { circleInLine } from '../collisions/circleOnLine';
@@ -6,12 +6,12 @@ import { Line } from '../shapes/line';
 
 export type MouseHitEvent = {
     pos: CanvasPosition,
-    shapeType: ShapeTypes,
+    shapeType: DrawTypes,
     mouseHits: MouseHits
 };
 
 export type MouseHits = {
-    hits: Map<ShapeTypes, Set<string>>;
+    hits: Map<DrawTypes, Set<string>>;
 };
 
 const deltaHit: number = 3;
@@ -27,7 +27,7 @@ export function collisionProcessor(pos: CanvasPosition, shapes: CanvasShapes): M
         if (hit === true) {
             hps.add(point.id);
         }
-        ret.hits.set(ShapeTypes.POINT, hps);
+        ret.hits.set(DrawTypes.POINT, hps);
     }
 
     for (const line of shapes.lines.values()) {
@@ -36,7 +36,7 @@ export function collisionProcessor(pos: CanvasPosition, shapes: CanvasShapes): M
         if (hit.hit === true) {
             hls.add(line.id);
         }
-        ret.hits.set(ShapeTypes.LINE, hls);
+        ret.hits.set(DrawTypes.LINE, hls);
     }
     
     return ret;

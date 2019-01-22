@@ -3,37 +3,38 @@ import * as rxjs from 'rxjs';
 import * as operators from 'rxjs/operators';
 import './App.css';
 import { CanvasContainer } from './canvas/CanvasContainer';
-import { ShapeTypes } from './canvas/canvasShapes';
+import { DrawTypes } from './canvas/canvasShapes';
 import { Navbar } from './lib/ui/navbar/Navbar';
 
 interface AppState {
-    drawingType: ShapeTypes;
+    drawingType: DrawTypes;
     delete: boolean;
 }
 
 export interface NavButtonsProps {
-    drawingType: ShapeTypes;
-    onClick?: (drawingType: ShapeTypes) => any;
+    drawingType: DrawTypes;
+    onClick?: (drawingType: DrawTypes) => any;
 }
 
 class NavButtons extends React.Component<NavButtonsProps> {
 
     onClick = (e: React.SyntheticEvent<HTMLButtonElement>) => {
         const t = e.target as HTMLButtonElement;
-        /*if (this.props.onClick && t.dataset.shape) {
-            this.props.onClick(ShapeTypes[t.dataset.shape]);
-        }*/
+        if (this.props.onClick && t.dataset.shape) {
+            const s = t.dataset.shape as keyof typeof DrawTypes;
+            this.props.onClick(DrawTypes[s]);
+        }
     }
 
     render() {
         const { drawingType } = this.props;
         return (
             <React.Fragment>
-                <button data-shape={ShapeTypes.POINT} onClick={this.onClick} className={drawingType === ShapeTypes.POINT ? 'selected' : ''}>Pt</button>
-                <button data-shape={ShapeTypes.LINE} onClick={this.onClick} className={drawingType === ShapeTypes.LINE ? 'selected' : ''}>Lyn</button>
-                <button data-shape={ShapeTypes.POLYLINE} onClick={this.onClick} className={drawingType === ShapeTypes.POLYLINE ? 'selected' : ''}>PLyn</button>
-                <button data-shape={ShapeTypes.POLYGON} onClick={this.onClick} className={drawingType === ShapeTypes.POLYGON ? 'selected' : ''}>Pol</button>
-                <button data-shape={ShapeTypes.MOVEMENT} onClick={this.onClick} className={drawingType === ShapeTypes.MOVEMENT ? 'selected' : ''}>Mov</button>
+                <button data-shape={DrawTypes.POINT} onClick={this.onClick} className={drawingType === DrawTypes.POINT ? 'selected' : ''}>Pt</button>
+                <button data-shape={DrawTypes.LINE} onClick={this.onClick} className={drawingType === DrawTypes.LINE ? 'selected' : ''}>Lyn</button>
+                <button data-shape={DrawTypes.POLYLINE} onClick={this.onClick} className={drawingType === DrawTypes.POLYLINE ? 'selected' : ''}>PLyn</button>
+                <button data-shape={DrawTypes.POLYGON} onClick={this.onClick} className={drawingType === DrawTypes.POLYGON ? 'selected' : ''}>Pol</button>
+                <button data-shape={DrawTypes.MOVEMENT} onClick={this.onClick} className={drawingType === DrawTypes.MOVEMENT ? 'selected' : ''}>Mov</button>
             </React.Fragment>
         );
     }
@@ -60,7 +61,7 @@ class App extends React.Component<any, AppState> {
     constructor(props: any) {
         super(props);
         this.state = {
-            drawingType: ShapeTypes.POINT,
+            drawingType: DrawTypes.POINT,
             delete: false
         };
 
@@ -95,18 +96,10 @@ class App extends React.Component<any, AppState> {
         });
     }
 
-    onChangeShape = (drawingType: ShapeTypes) => {
+    onChangeDrawing = (drawingType: DrawTypes) => {
         this.setState({
             drawingType
         });
-    }
-
-    onAddPoint = () => {
-        /*const p = this.state.polylines[0];
-        p.addPoint(new Point(100, 100), 1);
-        this.setState({
-            polylines: [p]
-        });*/
     }
 
     render() {
@@ -117,7 +110,7 @@ class App extends React.Component<any, AppState> {
                 </div>
                 <div className={'appMain'}>
                     <Navbar collapsible={true}>
-                        <NavButtons drawingType={this.state.drawingType} onClick={this.onChangeShape} />
+                        <NavButtons drawingType={this.state.drawingType} onClick={this.onChangeDrawing} />
                     </Navbar>
                     <CanvasContainer className={'appResize'} drawingType={this.state.drawingType} hoverActive={true} delete={this.state.delete} />
                 </div>
