@@ -61,13 +61,17 @@ export function drawPolygon(ctx: CanvasRenderingContext2D, pol: Polygon, fillDen
     ctx.strokeStyle = oldStrokeStyle;
 }
 
-export function drawLine(ctx: CanvasRenderingContext2D, line: Line): void {
+export function drawLine(ctx: CanvasRenderingContext2D, line: Line, hit: boolean): void {
     if (ctx) {
         const oldStrokeStyle = ctx.strokeStyle;
+        const oldlineWidth = ctx.lineWidth;
+        ctx.strokeStyle = hit === true ? 'rgba(255, 0, 0, 1)' : 'rgba(255, 0, 0, 0.75)';
+        ctx.lineWidth = hit === true ? 2 : 1;
         ctx.beginPath();
         ctx.moveTo(line.vertex[0].x, line.vertex[0].y);
         ctx.lineTo(line.vertex[1].x, line.vertex[1].y);
         ctx.stroke();
         ctx.strokeStyle = oldStrokeStyle;
+        ctx.lineWidth = oldlineWidth;
     }
 }

@@ -2,6 +2,9 @@
 
 ## Collisions of shapes
 
+Collisions are calculated with different algorithms.
+Should add a parameter for every collision which give a measure of the precision of the collision. This can be useful in case we need to compare two collision and decide which we should use to delete an element.
+
 ### Point and circle
 
 The collision of a point and a circle is quite simple. We need to calculate the distance from the point and the center of the circle. If it's smaller or equal the radius the collision is true.

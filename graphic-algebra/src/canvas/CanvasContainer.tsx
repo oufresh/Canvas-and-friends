@@ -58,7 +58,8 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             currentDrawingId: '',
             shapes: createInitCanvasShapes(),
             mouseHits: {
-                hits: new Map()
+                hits: new Map(),
+                detectedHits: false
             },
             drawing: false,
             lastDrawnId: ''
@@ -90,7 +91,9 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
             return (this.props.hoverActive !== undefined && this.props.hoverActive === true);
         }), operators.map((pos: CanvasPosition) => {
             return collisionProcessor(pos, this.state.shapes);
-        }));
+        }
+        // }), //operators.filter((mouseHits: MouseHits) => mouseHits.detectedHits
+        ));
         this.onMouseHitSub = this.onMouseHitObs.subscribe((mouseHits: MouseHits) => {
             this.setState({ mouseHits });
         });
@@ -101,7 +104,7 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
     createDrawingEventProcessor(clickSubj: rxjs.Subject<CanvasPosition>, moveSubj: rxjs.Subject<CanvasPosition>): rxjs.Observable<Drawing | null> {
         if (this.props.drawingType === DrawTypes.POINT) {
             return clickSubj.pipe(operators.map((pos: CanvasPosition) => {
-                const pointId = 'POINT-' + + (this.state.shapes.points.size + 1);
+                const pointId = 'POINT-' + (this.state.shapes.points.size + 1);
                 return {
                     type: DrawTypes.POINT,
                     shape: new Point(pointId, pos[0], pos[1]),
@@ -258,7 +261,6 @@ export class CanvasContainer extends React.Component<CanvasContainerProps, Canva
                         shapes={this.state.shapes}
                         onMouseClick={this._onMouseClick}
                         onMouseMove={this._onMouseMove}
-                        mousePos={this.state.mousePos}
                         mouseHits={this.state.mouseHits}
                     />
                     <CanvasLogger mouseCoords={this.state.mousePos} mouseClickPos={this.state.mouseClickPos} delete={this.props.delete} />
