@@ -6,8 +6,6 @@ export class Line implements Shape {
     id: string;
     constructor(id: string, p1: Point, p2: Point) {
         this.id = id;
-        this.vertex = [];
-        this.vertex.push(p2);
-        this.vertex.push(p1);
+        this.vertex = [p1, p2];
     }
 }

@@ -3,7 +3,7 @@ import { Point } from '../shapes/point';
 import { Polygon } from '../shapes/polygon';
 import { Polyline } from '../shapes/polyline';
 
-export enum ShapeTypes {
+export enum DrawTypes {
     POINT = 'POINT',
     LINE = 'LINE',
     POLYLINE = 'POLYLINE',

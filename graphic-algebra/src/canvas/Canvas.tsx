@@ -8,7 +8,7 @@ import { pointInCircle } from '../collisions/pointInCircle';
 import { Point } from '../shapes/point';
 import { pointInPolygon } from '../collisions/pointInPolygon';
 import * as Shape2Draw from './shape2Draw';
-import { CanvasShapes, ShapeTypes } from './canvasShapes';
+import { CanvasShapes, DrawTypes } from './canvasShapes';
 import { CanvasPosition } from './types';
 import { MouseHits } from './canvasCollisions';
 
@@ -108,12 +108,12 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                     // this.cContext.fillRect(eLine.expVertex[1].x, eLine.expVertex[1].y, 1, 1); // fill in the pixel at (10,10)  
                 }*/
             });
-        }
-            // });
-/*
+
             this.props.shapes.points.forEach((point: Point) => {
                 if (this.cContext) {
-                    const hit = pointInCircle(point.x, point.y, this.props.mousePos[0], this.props.mousePos[1], 3);
+                    // const hit = pointInCircle(point.x, point.y, this.props.mousePos[0], this.props.mousePos[1], 3);
+                    const hitPoints = this.props.mouseHits.hits.get(DrawTypes.POINT);
+                    const hit = hitPoints !== undefined ? hitPoints.has(point.id) : false;
                     Shape2Draw.drawPoint(this.cContext, point, hit);
                     // const line = this.props.shapes.lines[0];
                     // const collision = circleInLine(line.vertex[0].x, line.vertex[0].y, line.vertex[1].x, line.vertex[1].y, point.x, point.y, 10);
@@ -124,14 +124,14 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
                     // }
                 }
             });
+        }
 
-            this.props.shapes.polygons.forEach((pol: Polygon) => {
+            /*this.props.shapes.polygons.forEach((pol: Polygon) => {
                 if (this.cContext) {
                     const hit = pointInPolygon(pol.vertices, this.props.mousePos[0], this.props.mousePos[1]);
                     Shape2Draw.drawPolygon(this.cContext, pol, hit);
                 }
-            });
-        }*/
+            });*/
     }
 
     onMouseMove = (e: any) => {
@@ -153,18 +153,18 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
     }
 
     render() {
-        const shapes = [];
+        /*const shapes = [];
         if (this.state.ready === true) {
             for (let point of this.props.shapes.points.values()) {
-                const hitPoints = this.props.mouseHits.hits.get(ShapeTypes.POINT);
+                const hitPoints = this.props.mouseHits.hits.get(DrawTypes.POINT);
                 const hit = hitPoints !== undefined ? hitPoints.has(point.id) : false;
                 shapes.push(<PCPoint key={'RPoint-' + point.id} point={point} hit={hit} />);
             }
-        }
+        }*/
 
         return (
             <CanvasContext.Provider value={{ctx: this.cContext}}>
-                <canvas className={'appCanvas'} ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick}>{shapes}</canvas>
+                <canvas className={'appCanvas'} ref={this.cRef} width={this.props.width} height={this.props.height} onMouseMove={this.onMouseMove} onClick={this.onMouseclick} />
             </CanvasContext.Provider>
         );
     }
