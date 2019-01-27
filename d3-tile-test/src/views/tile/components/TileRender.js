@@ -1,5 +1,5 @@
 //@flow
-import React from "react";
+import * as React from "react";
 import { select, event } from "d3-selection";
 import { zoom as d3Zoom } from "d3-zoom";
 import {
@@ -9,7 +9,7 @@ import {
   type Tiles,
   type RenderModality,
   ZoomMap,
-  type IsSchemaEnd,
+  //type IsSchemaEnd,
   type SchemaBoundary,
   MapTileCache
 } from "../../../modules";
@@ -17,7 +17,6 @@ import { SvgDiv } from "../../commons";
 import {
   type ViewportObjectPosition,
   type MapSize,
-  type RefObject,
   type Scales,
   type ReferenceSystemScales
 } from "../../../types";
@@ -50,7 +49,6 @@ export type TileRenderPropsType = {
   renderModality: RenderModality,
   scales: Scales,
   objectSize: MapSize,
-  baseTileUrl: string,
   translateExtent?: ?Array<Array<number>>, //per ora sappiamo che dovremo affrontarlo
   onZoomed: ZoomMap => any,
   tiles: Tiles,
@@ -59,14 +57,14 @@ export type TileRenderPropsType = {
   onMouseDownFilter?: (Array<HTMLElement>) => boolean,
   onClickFilter?: (Array<HTMLElement>) => boolean,
   referenceSystemScales: ReferenceSystemScales,
-  schemaEnd: IsSchemaEnd,
-  schemaBoundary: SchemaBoundary,
+  //schemaEnd: IsSchemaEnd,
+  schemaBoundary?: SchemaBoundary,
   debugGrid?: boolean,
   tileCache: MapTileCache
 };
 
 export class TileRender extends React.Component<TileRenderPropsType> {
-  svgRef: RefObject;
+  svgRef: any;
   svg: Object;
   zoom: Object;
   zoomed: () => void;
@@ -130,8 +128,7 @@ export class TileRender extends React.Component<TileRenderPropsType> {
     this.svg = select(this.svgRef.current);
 
     const filter = () => {
-      //qui possiamo gestire il click singolo individuando prima down e bloccando l'azione di zoom
-      //tornando false l'evento è ignorato da d3-zoom e non fa le sue azioni di default
+      // per inibire il down e azione di pan di conseguenza se sono alla fine dello schema
       //console.log(event);
       /*if (event.type === "mousedown") {
         //console.log("mousedown");
@@ -234,8 +231,6 @@ export class TileRender extends React.Component<TileRenderPropsType> {
     ) {
       this.setPosition();
     }
-    //if (this.props.scaleTo !== null && prevProps.scaleTo != this.props.scaleTo)
-    //  this.scaleTo(this.props.scaleTo);
   }
 
   hideArrow(direction: string) {
@@ -286,55 +281,59 @@ export class TileRender extends React.Component<TileRenderPropsType> {
       tiles.translate[1]
     );
 
-    if (direction === "up") {
-      //console.log(direction);
-      origPos[1] -= Math.min(
-        DEFAULT_SCHEMA_SHIFT,
-        Math.abs(schemaBoundary.top)
+    if (schemaBoundary) {
+      if (direction === "up") {
+        //console.log(direction);
+        origPos[1] -= Math.min(
+          DEFAULT_SCHEMA_SHIFT,
+          Math.abs(schemaBoundary.top)
+        );
+      } else if (direction === "right") {
+        origPos[0] += Math.min(
+          DEFAULT_SCHEMA_SHIFT,
+          Math.abs(schemaBoundary.right)
+        );
+      } else if (direction === "bottom") {
+        origPos[1] += Math.min(
+          DEFAULT_SCHEMA_SHIFT,
+          Math.abs(schemaBoundary.bottom)
+        );
+      } else if (direction === "left") {
+        origPos[0] -= Math.min(
+          DEFAULT_SCHEMA_SHIFT,
+          Math.abs(schemaBoundary.left)
+        );
+      }
+
+      const schemaPosition = convertCoordsForTiles(
+        referenceSystemScales.currentScale,
+        referenceSystemScales.defaultScale
+          ? referenceSystemScales.defaultScale
+          : 0,
+        origPos
       );
-    } else if (direction === "right") {
-      origPos[0] += Math.min(
-        DEFAULT_SCHEMA_SHIFT,
-        Math.abs(schemaBoundary.right)
+
+      const scaledObjectTranslation = calcObjectTranslation(
+        renderModality,
+        schemaPosition,
+        objectSize.width,
+        objectSize.height,
+        scales.defaultExpScale
       );
-    } else if (direction === "bottom") {
-      origPos[1] += Math.min(
-        DEFAULT_SCHEMA_SHIFT,
-        Math.abs(schemaBoundary.bottom)
-      );
-    } else if (direction === "left") {
-      origPos[0] -= Math.min(
-        DEFAULT_SCHEMA_SHIFT,
-        Math.abs(schemaBoundary.left)
-      );
+
+      if (scaledObjectTranslation)
+        moveRenderTo(
+          this.svg,
+          this.zoom,
+          scaledObjectTranslation[0],
+          scaledObjectTranslation[1],
+          0,
+          0,
+          scales.currentExpScale
+            ? scales.currentExpScale
+            : scales.defaultExpScale
+        );
     }
-
-    const schemaPosition = convertCoordsForTiles(
-      referenceSystemScales.currentScale,
-      referenceSystemScales.defaultScale
-        ? referenceSystemScales.defaultScale
-        : 0,
-      origPos
-    );
-
-    const scaledObjectTranslation = calcObjectTranslation(
-      renderModality,
-      schemaPosition,
-      objectSize.width,
-      objectSize.height,
-      scales.defaultExpScale
-    );
-
-    if (scaledObjectTranslation)
-      moveRenderTo(
-        this.svg,
-        this.zoom,
-        scaledObjectTranslation[0],
-        scaledObjectTranslation[1],
-        0,
-        0,
-        scales.currentExpScale ? scales.currentExpScale : scales.defaultExpScale
-      );
   }
 
   render() {

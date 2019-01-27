@@ -72,11 +72,7 @@ const HEIGHT = 44016;
 const UUID_PROVA = "Prova";
 
 const baseUrl =
-  "http://localhost:3000/schematica/rest/schematica/schemi/tile/ST/ST/REALE/TOPOLOGICO_MT/none/none/Monocromatico";
-
-const tileUrlBuilder = ({ baseUrl, width, height, x, y, zoomIndex }) => {
-  return `${baseUrl}/${width}/${height}/${zoomIndex}/${x}/${y}?id=none&infoDAL=none&codApp=none`;
-};
+  "http://localhost:3000/schematica/rest/schematica/schemi/metatile/ST/ST/REALE/TOPOLOGICO_MT/none/none/Monocromatico";
 
 class ExpScaleMapRender extends React.Component {
   constructor(props) {

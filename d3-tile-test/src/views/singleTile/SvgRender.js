@@ -11,7 +11,6 @@ import { type ZoomMap, type ZoomTransform } from "../../modules/maps";
 import {
   type Scales,
   type ViewportObjectPosition,
-  type RefObject,
   type MapSize
 } from "../../types";
 import { ArrowUp, ArrowRight, ArrowBottom, ArrowLeft } from "../arrows";
@@ -47,7 +46,7 @@ export type SvgRenderPropsType = {
 };
 
 export class SvgRender extends React.Component<SvgRenderPropsType> {
-  svgRef: RefObject;
+  svgRef: any;
   svg: Object;
   zoom: Object;
 

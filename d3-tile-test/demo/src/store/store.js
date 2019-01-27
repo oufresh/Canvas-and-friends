@@ -14,7 +14,10 @@ const composeEnhancers = () =>
 
 const logger = createLogger({
   predicate: (getState, action) => {
-    if (action.type.includes("STORE_TILE")) {
+    if (
+      action.type.includes("STORE_TILE") ||
+      action.type.includes("STORE_METATILE_MAP")
+    ) {
       //console.log("---------STORE_TILE----------");
       return false;
     }
@@ -33,7 +36,7 @@ const tileUrlBuilder = (
   return `${baseUrl}/${width}/${height}/${zoomIndex}/${x}/${y}?id=none&infoDAL=none&codApp=none`;
 };
 
-const tileLoaderMiddleware = createTileLoaderMiddleware(tileUrlBuilder);
+const tileLoaderMiddleware = createTileLoaderMiddleware(tileUrlBuilder, true);
 
 const middlewares = applyMiddleware(
   resizeMiddleware,

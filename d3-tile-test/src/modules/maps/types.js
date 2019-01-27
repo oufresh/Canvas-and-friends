@@ -56,6 +56,7 @@ export interface MapRecord {
   tileCacheUpdateTime: number;
   baseTileServiceurl: string;
   tileExpiration: number;
+  loading: boolean;
 }
 
 export const initialMapRecord = {
@@ -85,7 +86,8 @@ export const initialMapRecord = {
   tileCacheMap: new Map(),
   tileCacheUpdateTime: 0,
   baseTileServiceurl: "",
-  tileExpiration: NaN
+  tileExpiration: NaN,
+  loading: false
 };
 
 export type Maps = Map<string, MapRecord>;
@@ -165,3 +167,5 @@ export interface MapTileCache {
 }
 
 export type MapsTileCacheByUuid = Map<string, MapTileCache>;
+
+export type IsLoadingTilesByUuuid = Map<string, boolean>;
