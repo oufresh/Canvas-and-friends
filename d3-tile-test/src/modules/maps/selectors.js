@@ -552,7 +552,7 @@ export const getMapsTilesCacheByUuid: State => MapsTileCacheByUuid = createSelec
 
 export const isLoadingTilesByUuid: State => IsLoadingTilesByUuuid = createSelector(
   [getMapsRoot],
-  (mapsRecord: MapsRecord): IsLoadingTilesByUuuid => {
+  (mapsRecord: MapsRecord): MapsTileCacheByUuid => {
     let ret = new Map();
     if (mapsRecord.maps && mapsRecord.maps.size > 0) {
       mapsRecord.maps.forEach((m: MapRecord, uuid: string) => {

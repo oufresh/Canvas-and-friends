@@ -1,7 +1,7 @@
 {
   "name": "d3-tile-test",
   "version": "1.0.0",
-  "description": "d3-tile-test: Visualizzazione di mappe vettoriali e raster, con tile o monotile",
+  "description": "d3-tile-test",
   "main": "lib/index.js",
   "module": "es/index.js",
   "files": [

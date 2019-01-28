@@ -1,18 +1,16 @@
 # D3 Tests
 
-D3 tets
+Sample drawing svg with React and d3 for zoom and translate.
 
-## Trasformazione d3-zoom
+## d3-zoom trasform
 
-Con d3-zoom si possono fare trasformazioni del canvas svg. Si applica la matrice di trasformazione 2D al canvas o gruppo svg (vale anceh per canvas HTML5):
+2D trasform matrix is applied to a svg \<g\> tag
 
-k 0 tx<br/>
-0 k ty<br/>
+k 0 tx
+0 k ty
 0 0 1
 
-In questo modo viene fatta la trasformazione di coordinate di ciascun vertice. Gli oggetti sono scalati del fattore k e traslati di (tx, ty).
-
-Nello specifico utilizzando l'attributo **transform** applicato al gruppo **g**, assimilabile ad un layer che contiene poi il codice svg, si ottiene la trasformazione. Ad esempio:
+The matrix is applied to every tag/geometry inside the group.
 
 ```html
 <svg>
@@ -22,12 +20,13 @@ Nello specifico utilizzando l'attributo **transform** applicato al gruppo **g**,
 </svg>
 ```
 
-### Inizializzazione
 
-Utlizzando d3-zoom si inizializza l'uso di zoom e translate con il codice:
+### d3-zoom initialization
+
+This is a basic initialization of d3-zoom. The trasform is directly applied to a **g**
 
 ```javascript
-const svg = d3.select(svgElem);
+const svg = d3.select(svgTag);
 const layer = svg.append('g');
 const zoom = d3.zoom()
   .on("zoom", () => {
@@ -36,48 +35,52 @@ const zoom = d3.zoom()
 
 ```
 
-Questo abilita l'interazione di default con il mouse (rotella per zoom, mouse down - pan - mouse up per traslare).
+This also enables the default uer interaction: wheel for zoom, pan wiht mouse move.
 
-### Scalamenti e traslazioni programmatiche
 
-Per effetture una traslazione, uno scalamento o entrambi in modo programmatico, ad esempio una centratura, si deve applicare la matrice di traformazione noti i parametri che la compongono: le traslazioni tx e ty e il fattore di scala k.
-In generale dobbiamo tenere conto che una trasformazione di questo genere può essere composta da diversi passi; in questo caso 3 partendo dalla matrice indentità **d3.zoomIdentity**.
+### Scale and translate
 
-1. Traslazione in coordinate della viewport dell'origine dell nostro oggetto/mappa/schema disegnato nel layer.
-2. Applicazione dello scalamento a tutti gli oggetti del layer.
-3. Traslazione degli oggetti nel layer in coordinate relative al layer stesso, ovvero quelle originali del nostro schema o modello fisico di partenza.
+A generic trasform  start from **d3.zoomIdentity**. There are three steps:
 
-Ad esempio se volessi spostare il centro dello schema in una specifica posizione della viewport dovrei costruire la matrice in questo modo:
+1. Translate in the viewport coordinates to move the origin where we need
+2. Scale the object
+3. Translate the scaled object to have the interested point in choosen position of the viewport 
 
 ```javascript
 
 const viewportPosition = [50, 50];
-const schemaSize = [500, 500];
+const objectSize = [500, 500];
 
 svg.call(zoom.transform, d3.zoomIdentity
     .translate(viewportPosition[0], viewportPosition[1])
     .scale(currentK)
-    .translate(-schemaSize[0]/2, -schemaSize[1]/2)
+    .translate(-objectSize[0]/2, -objectSize[1]/2)
  );
 ```
 
-Se non avessi necessità di spostare il punto di origine dello schema, prima indicato da **viewportPosition** posso anche lasciare zeri nella trasformazione.
+**Note** the above function doesn't care ab out the boundaries! It's a procedure useful for the initialization. You may use d3-zoom **zoom.translateBy(selection, x, y)**, **zoom.translateTo(selection, x, y)**, **zoom.scaleBy(selection, k)** and **zoom.scaleTo(selection, k)** which ensure that you can't go outside the object is you set the extent constraint.
 
-### Calcolo coordinate schema
 
-Risulta utile conoscere le coordinate dello schema date quelle della viewport (ad esempio per interazioni mouse). Per fare questo si deve applicare una trasformazione inversa conoscendo le coordinate del mouse nel canvas svg.
+### Object coordinates
 
-Un modo è memorizzare **d3.event.transform** ad ogni chiamata di **.on("zoom", () => { ... ** in una variabile o stato ed utilizzarlo quindi per il calcolo.
-Questo perché **d3.event** conterrà via via solo le informazioni relative all'evento avvenuto in quel momento.
+To calcultate object coordinates we can use the trasform in d3.event. Wa can store it every time a zoom event appens in a var.
+Then we can calculate the original x and y applying the formula in the example below.
+
 
 ```javascript
-var d3Transform = ...;
+
+var d3Trasform = ...;
+
+
+zoom.on("zoom", () => {
+  d3Trasform = d3.event.trasform;
+});
 
 function calcCoords(mx, my)
 {
   if (d3Transform) {
-    let cx = (mx - d3Transform.x) / d3Transform.k;
-    let cy = (my - d3Transform.y) / d3Transform.k;
+    let cx = (mx - d3Trasform.x) / d3Trasform.k;
+    let cy = (my - d3Trasform.y) / d3Trasform.k;
     return [cx, cy];
   }
 

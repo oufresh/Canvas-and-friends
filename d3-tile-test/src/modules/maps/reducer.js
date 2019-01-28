@@ -19,8 +19,7 @@ import {
   type RemoveMap,
   StoreTileMap,
   StoreMetaTileMap,
-  MetaTileElement,
-  LoadingTilesMap
+  MetaTileElement
 } from "./actionCreators";
 import {
   initialMapsRecord,
@@ -249,7 +248,7 @@ const storeMetaTileMapHandler = (
 
 const loadingTilesMapHandler = (
   state: MapsRecord,
-  payload: LoadingTilesMap
+  payload: StoreMetaTileMap
 ) => {
   const { uuid, loading } = payload;
   const existUuid = state.maps.has(uuid);

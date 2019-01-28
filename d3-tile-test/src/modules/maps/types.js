@@ -57,7 +57,6 @@ export interface MapRecord {
   baseTileServiceurl: string;
   tileExpiration: number;
   loading: boolean;
-  useMetaTile: boolean;
 }
 
 export const initialMapRecord = {
@@ -88,8 +87,7 @@ export const initialMapRecord = {
   tileCacheUpdateTime: 0,
   baseTileServiceurl: "",
   tileExpiration: NaN,
-  loading: false,
-  useMetaTile: false
+  loading: false
 };
 
 export type Maps = Map<string, MapRecord>;

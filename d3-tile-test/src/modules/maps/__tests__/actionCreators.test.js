@@ -6,8 +6,7 @@ import {
   resizeMap,
   removeMap,
   storeTileMap,
-  storeMetaTileMap,
-  loadingTilesMap
+  storeMetaTileMap
 } from "../actionCreators";
 import {
   INIT_MAP,
@@ -16,8 +15,7 @@ import {
   RESIZE_MAP,
   REMOVE_MAP,
   STORE_TILE_MAP,
-  STORE_METATILE_MAP,
-  LOADING_TILES_MAP
+  STORE_METATILE_MAP
 } from "../actionDefinitions";
 import { EXP_RENDER_MODALITY } from "../renderModalities";
 
@@ -191,23 +189,6 @@ describe("actionCreator module maps", () => {
           { x: 3, y: 1, z: 1, tile: "tile3" },
           { x: 4, y: 1, z: 1, tile: "tile4" }
         ]
-      }
-    });
-  });
-
-  it("check action loadingTilesMap", () => {
-    const loading = {
-      uuid: "Ciccio",
-      loading: true
-    };
-
-    const action = loadingTilesMap(loading);
-
-    expect(action).toEqual({
-      type: LOADING_TILES_MAP,
-      payload: {
-        uuid: "Ciccio",
-        loading: true
       }
     });
   });

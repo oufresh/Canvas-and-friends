@@ -6,11 +6,7 @@ import {
   type Dispatch
 } from "@stweb-lib/redux-helper";
 import { ZOOM_MAP } from "../actionDefinitions";
-import {
-  storeTileMap,
-  storeMetaTileMap,
-  loadingTilesMap
-} from "../actionCreators";
+import { storeTileMap, storeMetaTileMap } from "../actionCreators";
 import { serializeTileIndex } from "../utils";
 import {
   type Tiles,
@@ -61,7 +57,10 @@ export type TileUrlBuilderF = (
   zoomIndex: number
 ) => string;
 
-export function createTileLoaderMiddleware(tileUrlBuilder: TileUrlBuilderF) {
+export function createTileLoaderMiddleware(
+  tileUrlBuilder: TileUrlBuilderF,
+  useMetaTile: boolean
+) {
   const pendingFetchSet: Set<string> = new Set();
   return ({
     getState,
@@ -96,7 +95,7 @@ export function createTileLoaderMiddleware(tileUrlBuilder: TileUrlBuilderF) {
           tiles.forEach((t: ParamTiles) => {
             let index = null;
             let url = "";
-            if (map.useMetaTile === true) {
+            if (useMetaTile === true) {
               const metaTileIndex: TileIndex = getMataTileIndex({
                 z: t.z,
                 x: t.x,
@@ -130,14 +129,6 @@ export function createTileLoaderMiddleware(tileUrlBuilder: TileUrlBuilderF) {
               url !== "" &&
               !pendingFetchSet.has(url)
             ) {
-              if (map.loading !== true && pendingFetchSet.size === 0) {
-                dispatch(
-                  loadingTilesMap({
-                    uuid,
-                    loading: true
-                  })
-                );
-              }
               pendingFetchSet.add(url);
               fetch(url)
                 .then(r => {
@@ -151,7 +142,7 @@ export function createTileLoaderMiddleware(tileUrlBuilder: TileUrlBuilderF) {
                       ", " +
                       new Date().toISOString()
                   );*/
-                  if (map.useMetaTile === true) {
+                  if (useMetaTile === true) {
                     const tiles = response.tileKeys.map(tileKey => {
                       const s = tileKey.x + "-" + tileKey.y;
                       return {
@@ -181,31 +172,7 @@ export function createTileLoaderMiddleware(tileUrlBuilder: TileUrlBuilderF) {
                     );
                   }
                   pendingFetchSet.delete(url);
-                  if (pendingFetchSet.size === 0)
-                    dispatch(
-                      loadingTilesMap({
-                        uuid,
-                        loading: false
-                      })
-                    );
                 })
                 .catch(e => {
                   console.error(e);
                   pendingFetchSet.delete(url);
-                  if (pendingFetchSet.size === 0)
-                    dispatch(
-                      loadingTilesMap({
-                        uuid,
-                        loading: false
-                      })
-                    );
-                });
-            }
-          });
-        }
-      }
-      return result;
-    }
-    return next(action);
-  };
-}

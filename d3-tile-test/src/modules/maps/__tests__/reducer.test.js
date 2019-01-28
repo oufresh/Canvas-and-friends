@@ -7,8 +7,7 @@ import {
   resizeMap,
   removeMap,
   storeTileMap,
-  storeMetaTileMap,
-  loadingTilesMap
+  storeMetaTileMap
 } from "../actionCreators";
 import { maps } from "../reducer";
 import { EXP_RENDER_MODALITY } from "../renderModalities";
@@ -615,56 +614,6 @@ describe("maps reducer", () => {
         timestamp: 12345678
       };
       maps(stateBefore, storeMetaTileMap(p));
-    };
-
-    expect(t).toThrowError(MAP_ERROR);
-  });
-
-  it("loadingTilesMap Action with uuid correct", () => {
-    const uuid = "loadingTilesMap";
-    const mapsTileBefore = new Map([
-      [
-        uuid,
-        {
-          uuid: uuid,
-          loading: false
-        }
-      ]
-    ]);
-    const stateBefore = {
-      maps: mapsTileBefore
-    };
-    const p = {
-      uuid: uuid,
-      loading: true
-    };
-    const stateAfter = maps(stateBefore, loadingTilesMap(p));
-
-    const mapsTile = new Map();
-    mapsTile.set(uuid, {
-      uuid: uuid,
-      loading: true
-    });
-
-    const stateExpected = {
-      maps: mapsTile
-    };
-
-    expect(stateAfter).toEqual(stateExpected);
-  });
-
-  it("loadingTilesMap Action with uuid not into the state throw Error", () => {
-    const t = () => {
-      const uuid = "loadingTilesMap";
-      const mapsTileBefore = new Map([[uuid, { uuid, loading: false }]]);
-      const stateBefore = {
-        maps: mapsTileBefore
-      };
-      const p = {
-        uuid: "loadingTilesMapError",
-        loading: true
-      };
-      maps(stateBefore, loadingTilesMap(p));
     };
 
     expect(t).toThrowError(MAP_ERROR);

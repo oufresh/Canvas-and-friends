@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # d3-maps
 
 Libreria per il rendering di geometrie con tile attraverso svg e raster. In questo documento le formule matematiche sono scritte con Katex (un subset di latex). Con Visual Studio Code è possibile installare una extension [1] per avaere l'anterprima; le formule vanno racchiuse in appositi tag $\` ... \`$ per GitLab e impostare il parametro di configurazione "mdmath.delimiters": "gitlab" per essere coerenti con GitLab.
@@ -1134,3 +1135,6 @@ Un altro spunto per la limitazione di pan e zoom potrebbe essere quello di blocc
 [2](https://github.com/d3/d3-tile) d3-tile
 [3](https://github.com/d3/d3-zoom) d3-zoom
 [4](https://github.com/d3/d3-selection) d3-selection
+=======
+# d3 with tiles
+>>>>>>> 98f3c09b1faa1e7436e5963ca04fd13d7e703217
