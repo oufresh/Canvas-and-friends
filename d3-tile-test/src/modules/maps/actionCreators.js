@@ -6,7 +6,9 @@ import {
   ZOOM_MAP,
   RESIZE_MAP,
   REMOVE_MAP,
-  STORE_TILE_MAP
+  STORE_TILE_MAP,
+  STORE_METATILE_MAP,
+  LOADING_TILES_MAP
 } from "./actionDefinitions";
 import { type RenderModality } from "./types";
 import {
@@ -35,7 +37,8 @@ export type InitMap = {|
   width: number,
   objectPosition?: Array<number>,
   baseTileServiceurl: string,
-  tileExpiration: number
+  tileExpiration: number,
+  useMetaTile: boolean
 |};
 
 export type MoveMap = {|
@@ -76,6 +79,24 @@ export interface StoreTileMap {
   y: number;
   tile: string;
   timestamp: number;
+}
+
+export interface MetaTileElement {
+  z: number;
+  x: number;
+  y: number;
+  tile: string;
+}
+
+export interface StoreMetaTileMap {
+  uuid: string;
+  tiles: Array<MetaTileElement>;
+  timestamp: number;
+}
+
+export interface LoadingTilesMap {
+  uuid: string;
+  loading: boolean;
 }
 
 /*----- Actions ----- */
@@ -139,4 +160,16 @@ export const storeTileMap = (
   storeTileMap: StoreTileMap
 ): Action<StoreTileMap> => {
   return createAction(STORE_TILE_MAP, storeTileMap);
+};
+
+export const storeMetaTileMap = (
+  metatile: StoreMetaTileMap
+): Action<StoreMetaTileMap> => {
+  return createAction(STORE_METATILE_MAP, metatile);
+};
+
+export const loadingTilesMap = (
+  loading: LoadingTilesMap
+): Action<LoadingTilesMap> => {
+  return createAction(LOADING_TILES_MAP, loading);
 };

@@ -6,7 +6,9 @@ import {
   moveMap,
   resizeMap,
   removeMap,
-  storeTileMap
+  storeTileMap,
+  storeMetaTileMap,
+  loadingTilesMap
 } from "../actionCreators";
 import { maps } from "../reducer";
 import { EXP_RENDER_MODALITY } from "../renderModalities";
@@ -82,7 +84,9 @@ describe("maps reducer", () => {
             tileCacheMap: new Map(),
             tileCacheUpdateTime: 0,
             baseTileServiceurl: "ciccio",
-            tileExpiration: 55
+            tileExpiration: 55,
+            loading: false,
+            useMetaTile: false
           }
         ]
       ])
@@ -147,7 +151,9 @@ describe("maps reducer", () => {
           tileCacheMap: new Map(),
           tileCacheUpdateTime: 0,
           baseTileServiceurl: "ciccio",
-          tileExpiration: 55
+          tileExpiration: 55,
+          loading: false,
+          useMetaTile: false
         }
       ]
     ]);
@@ -517,13 +523,148 @@ describe("maps reducer", () => {
       };
       const p = {
         uuid: "storeTileMapWrong",
-        zoomIndex: 1,
+        z: 1,
         x: 1,
         y: 1,
         tile: "ciccio",
         timestamp: 12345678
       };
       maps(stateBefore, storeTileMap(p));
+    };
+
+    expect(t).toThrowError(MAP_ERROR);
+  });
+
+  it("storeMetaTileMap Action with uuid correct", () => {
+    const uuid = "storeMetaTileMap";
+    const mapsTileBefore = new Map([
+      [
+        uuid,
+        {
+          uuid: uuid,
+          tileCacheMap: new Map(),
+          tileCacheUpdateTime: 0
+        }
+      ]
+    ]);
+    const stateBefore = {
+      maps: mapsTileBefore
+    };
+    const p = {
+      uuid: uuid,
+      tiles: [
+        {
+          z: 1,
+          x: 1,
+          y: 1,
+          tile: "ciccio1"
+        },
+        {
+          z: 1,
+          x: 2,
+          y: 1,
+          tile: "ciccio2"
+        }
+      ],
+      timestamp: 12345678
+    };
+    const stateAfter = maps(stateBefore, storeMetaTileMap(p));
+
+    const mapsTile = new Map();
+    mapsTile.set(uuid, {
+      uuid: uuid,
+      tileCacheMap: new Map([
+        [
+          serializeTileIndex({ z: 1, x: 1, y: 1 }),
+          { tile: "ciccio1", timestamp: 12345678 }
+        ],
+        [
+          serializeTileIndex({ z: 1, x: 2, y: 1 }),
+          { tile: "ciccio2", timestamp: 12345678 }
+        ]
+      ]),
+      tileCacheUpdateTime: 0
+    });
+
+    const stateExpected = {
+      maps: mapsTile
+    };
+
+    expect(stateAfter).toEqual(stateExpected);
+  });
+
+  it("storeTilMetaeMap Action with uuid not into the state throw Error", () => {
+    const t = () => {
+      const uuid = "storeMetaTileMap";
+      const mapsTileBefore = new Map([
+        [uuid, { uuid, tileCacheMap: new Map(), tileCacheUpdateTime: 0 }]
+      ]);
+      const stateBefore = {
+        maps: mapsTileBefore
+      };
+      const p = {
+        uuid: "storeMetaTileMapWrong",
+        tiles: [
+          {
+            z: 1,
+            x: 1,
+            y: 1,
+            tile: "ciccio"
+          }
+        ],
+        timestamp: 12345678
+      };
+      maps(stateBefore, storeMetaTileMap(p));
+    };
+
+    expect(t).toThrowError(MAP_ERROR);
+  });
+
+  it("loadingTilesMap Action with uuid correct", () => {
+    const uuid = "loadingTilesMap";
+    const mapsTileBefore = new Map([
+      [
+        uuid,
+        {
+          uuid: uuid,
+          loading: false
+        }
+      ]
+    ]);
+    const stateBefore = {
+      maps: mapsTileBefore
+    };
+    const p = {
+      uuid: uuid,
+      loading: true
+    };
+    const stateAfter = maps(stateBefore, loadingTilesMap(p));
+
+    const mapsTile = new Map();
+    mapsTile.set(uuid, {
+      uuid: uuid,
+      loading: true
+    });
+
+    const stateExpected = {
+      maps: mapsTile
+    };
+
+    expect(stateAfter).toEqual(stateExpected);
+  });
+
+  it("loadingTilesMap Action with uuid not into the state throw Error", () => {
+    const t = () => {
+      const uuid = "loadingTilesMap";
+      const mapsTileBefore = new Map([[uuid, { uuid, loading: false }]]);
+      const stateBefore = {
+        maps: mapsTileBefore
+      };
+      const p = {
+        uuid: "loadingTilesMapError",
+        loading: true
+      };
+      maps(stateBefore, loadingTilesMap(p));
     };
 
     expect(t).toThrowError(MAP_ERROR);

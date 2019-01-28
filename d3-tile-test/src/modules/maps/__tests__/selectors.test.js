@@ -14,7 +14,8 @@ import {
   isReadyByUuid,
   isSchemaEndByUuid,
   getSchemaBoundaryByUuid,
-  getMapsTilesCacheByUuid
+  getMapsTilesCacheByUuid,
+  isLoadingTilesByUuid
 } from "../selectors";
 import {
   EXP_RENDER_MODALITY,
@@ -530,7 +531,7 @@ describe("Maps selectors", () => {
     ]);
 
     calcCoordsforTiles.mockImplementation((renderModality, viewportCoords) => {
-      return viewportCoords;  
+      return viewportCoords;
     });
 
     const state = {
@@ -580,5 +581,39 @@ describe("Maps selectors", () => {
       tileCacheMap: new Map(),
       tileCacheUpdateTime: 100
     });
+  });
+
+  it("isLoadingTilesByUuid", () => {
+    const uuid1 = "uuidTile1";
+    const mapsTile = new Map([
+      [
+        uuid1,
+        {
+          uuid: uuid1,
+          viewPortHeight: 600,
+          viewPortWidth: 700,
+          transformX: 32768,
+          transformY: 32768,
+          currentExpScale: 65536,
+          defaultExpScale: 65536,
+          initExpScale: 65536,
+          expScaleOffset: 2,
+          renderModality: EXP_RENDER_MODALITY,
+          height: 44016,
+          width: 52572,
+          tileCacheMap: new Map(),
+          tileCacheUpdateTime: 100,
+          tileExpiration: 5000,
+          loading: true
+        }
+      ]
+    ]);
+
+    const state = {
+      maps: mapsTile
+    };
+    const loading = isLoadingTilesByUuid(state).get(uuid1);
+
+    expect(loading).toEqual(true);
   });
 });

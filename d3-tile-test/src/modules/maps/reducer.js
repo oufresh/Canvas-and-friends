@@ -7,7 +7,9 @@ import {
   ZOOM_MAP,
   RESIZE_MAP,
   REMOVE_MAP,
-  STORE_TILE_MAP
+  STORE_TILE_MAP,
+  STORE_METATILE_MAP,
+  LOADING_TILES_MAP
 } from "./actionDefinitions";
 import {
   type InitMap,
@@ -15,7 +17,10 @@ import {
   ZoomMap,
   type ResizeMap,
   type RemoveMap,
-  StoreTileMap
+  StoreTileMap,
+  StoreMetaTileMap,
+  MetaTileElement,
+  LoadingTilesMap
 } from "./actionCreators";
 import {
   initialMapsRecord,
@@ -211,6 +216,60 @@ const storeTileMapHandler = (state: MapsRecord, payload: StoreTileMap) => {
   }
 };
 
+const storeMetaTileMapHandler = (
+  state: MapsRecord,
+  payload: StoreMetaTileMap
+) => {
+  const { uuid, tiles, timestamp } = payload;
+  if (state.maps.has(uuid)) {
+    const t = state.maps.get(uuid);
+    const metaTiles = [];
+
+    tiles.forEach((mt: MetaTileElement) => {
+      const ti: TileIndex = { z: mt.z, x: mt.x, y: mt.y };
+      const tv: TileValue = { tile: mt.tile, timestamp };
+      metaTiles.push([serializeTileIndex(ti), tv]);
+    });
+
+    const nt = update(t, {
+      tileCacheMap: {
+        $add: metaTiles
+      }
+    });
+
+    return update(state, {
+      maps: {
+        $add: [[uuid, nt]]
+      }
+    });
+  } else {
+    throw new Error(MAP_ERROR);
+  }
+};
+
+const loadingTilesMapHandler = (
+  state: MapsRecord,
+  payload: LoadingTilesMap
+) => {
+  const { uuid, loading } = payload;
+  const existUuid = state.maps.has(uuid);
+  if (existUuid) {
+    const t = state.maps.get(uuid);
+    const nt = update(t, {
+      loading: {
+        $set: loading
+      }
+    });
+    return update(state, {
+      maps: {
+        $add: [[uuid, nt]]
+      }
+    });
+  } else {
+    throw new Error(MAP_ERROR);
+  }
+};
+
 //$FlowFixMe
 export const maps = createReducer(initialMapsRecord, [
   createLeaf(INIT_MAP, initMapHandler),
@@ -218,5 +277,7 @@ export const maps = createReducer(initialMapsRecord, [
   createLeaf(ZOOM_MAP, zoomMapHandler),
   createLeaf(RESIZE_MAP, resizeMapHandler),
   createLeaf(REMOVE_MAP, removeMapHandler),
-  createLeaf(STORE_TILE_MAP, storeTileMapHandler)
+  createLeaf(STORE_TILE_MAP, storeTileMapHandler),
+  createLeaf(STORE_METATILE_MAP, storeMetaTileMapHandler),
+  createLeaf(LOADING_TILES_MAP, loadingTilesMapHandler)
 ]);

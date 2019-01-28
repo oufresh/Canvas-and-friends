@@ -5,7 +5,9 @@ import {
   moveMap,
   resizeMap,
   removeMap,
-  storeTileMap
+  storeTileMap,
+  storeMetaTileMap,
+  loadingTilesMap
 } from "../actionCreators";
 import {
   INIT_MAP,
@@ -13,7 +15,9 @@ import {
   MOVE_MAP,
   RESIZE_MAP,
   REMOVE_MAP,
-  STORE_TILE_MAP
+  STORE_TILE_MAP,
+  STORE_METATILE_MAP,
+  LOADING_TILES_MAP
 } from "../actionDefinitions";
 import { EXP_RENDER_MODALITY } from "../renderModalities";
 
@@ -158,6 +162,52 @@ describe("actionCreator module maps", () => {
         x: 1,
         y: 1,
         tile: "Solo la tile di prova"
+      }
+    });
+  });
+
+  it("check action StoreMetaTileMap", () => {
+    const someTiles = {
+      uuid: "prova",
+      timestamp: 100000,
+      tiles: [
+        { x: 1, y: 1, z: 1, tile: "tile1" },
+        { x: 2, y: 1, z: 1, tile: "tile2" },
+        { x: 3, y: 1, z: 1, tile: "tile3" },
+        { x: 4, y: 1, z: 1, tile: "tile4" }
+      ]
+    };
+
+    const actionActual = storeMetaTileMap(someTiles);
+
+    expect(actionActual).toEqual({
+      type: STORE_METATILE_MAP,
+      payload: {
+        uuid: "prova",
+        timestamp: 100000,
+        tiles: [
+          { x: 1, y: 1, z: 1, tile: "tile1" },
+          { x: 2, y: 1, z: 1, tile: "tile2" },
+          { x: 3, y: 1, z: 1, tile: "tile3" },
+          { x: 4, y: 1, z: 1, tile: "tile4" }
+        ]
+      }
+    });
+  });
+
+  it("check action loadingTilesMap", () => {
+    const loading = {
+      uuid: "Ciccio",
+      loading: true
+    };
+
+    const action = loadingTilesMap(loading);
+
+    expect(action).toEqual({
+      type: LOADING_TILES_MAP,
+      payload: {
+        uuid: "Ciccio",
+        loading: true
       }
     });
   });

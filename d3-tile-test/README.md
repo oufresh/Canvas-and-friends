@@ -2,22 +2,58 @@
 
 Libreria per il rendering di geometrie con tile attraverso svg e raster. In questo documento le formule matematiche sono scritte con Katex (un subset di latex). Con Visual Studio Code è possibile installare una extension [1] per avaere l'anterprima; le formule vanno racchiuse in appositi tag $\` ... \`$ per GitLab e impostare il parametro di configurazione "mdmath.delimiters": "gitlab" per essere coerenti con GitLab.
 
-## Componenti di Views esportati
 
-## Render delle mappe
 
-- PlainTileRender: si occupa di renderizzare mappe con le tile, sia nel caso di renderModality Esponenzionale che Lineare
-- SingleSvg: si occupa di renderizzare mappe con un singolo svg (single tile), sia nel caso di renderModality Esponenzionale che Lineare
-- GeoTileRender: si occupa di renderizzare mappe con le tile nel caso di renderModality Geo
+## Aspetti generali
+d3-maps è una libreria basata su React per il rendering degli schemi di ST. Supporta i seguenti formati per la visualizzazione degli schemi:
 
-## Informazioni relative alle scale
+Tiles svg indicizzate con lo standard Slippy Map.
+Tiles svg indicizzate con fattore di scala logaritmico, quello usato da ST.
+Tiles raster di tipi Slippy Map.
 
-- ScaleSelector o ScaleSelectorContainer
-- ZoomScaleInfo o ZoomScaleInfoContainer
+La libreria esporta:
+
+componenti React per il rendering puro delle tiles/svg
+modulo Redux maps per la gestione dello stato dello schema con reducers e selettori per eseguire il calcoli specifici per zoom e pan dello schema
+modulo layoutMaps per la gestione base di liste/popup/tabs di schemi contemporanei (non ha la parte di view dei tab)
+
+
+## Requisiti e dipendenze
+d3-maps si appoggia ad alcune librerie esterne in particolare:
+
+d3, d3-geo, d3-selection, d3-tile, d3-zoom per i calcoli, gestione eventi dello schema/mappa e tile
+React/Redux per il rendering e gestione dello stato (le tiles sono renderizzate con React e non con d3)
+immutability-helper per la modifica dello stato
+
+Utilizza inoltre librerie specifiche per ST
+
+@stweb-lib/redux-helper per i reducer
+
+
+## Demo
+Il progetto prevede una cartella demo in cui vi è un'app di prova. Per il corretto funzionamento della demo è necessario avere un server che fornisca le tiles. Nella demo l'url del server viene specificata al middleware di caricamento delle tiles attraverso la proprietà baseTileServiceurl e la funzione tileUrlBuilder.
+E' necessario inizializzare lo store con reducers e selectors, il middleware citato sopra, e infine un container connesso allo store stesso.
+In questa libreria non è stato previsto di esportare un container per dare delle componenti più riutilizzabili; è sensato che esso possa essere nello strato superiore (ad esempio in st-maps).
+Le condizioni iniziali sulla scala massima, minima e corrente sono calcolate con le funzioni di base messe a disposizione dalla libreria e i valori ottenuti dipendono dal tipo di scala utilizzato (logaritmica o no).
+
+## Interazioni con la mappa/schema
+Le interazioni di default sono quelle di pan e zoom attraverso il mouse. Sono inoltre previste delle azioni e relative funzioni per spostare o zoomare la mappa programmaticamente, catturare il click o il doppio click sullo schema con gli elementi svg trovati (su cui applicare eventuali logiche).
+
+## API
+La libreria esporta
+
+- Componenti grafici React
+- reducers
+- selectors
+- middleware
+- funzioni di utility per i calcoli relativi all'interazione, zoom e movimento dello schema
+
+## Componenti per il rendering di schemi tiled svg.
 
 ### PlainTileRender
 
-Le props del componente sono definite dal seguente type:
+Per il rendering di schemi con tile in formato svg il componente grafico esportato è **PlainTileRender**, un esempio del suo utilizzo si trova nella demo in **ExpScaleMapRender.js**.
+Questo componente ha diverse proprietà:
 
 ```js
 export type TileRenderPropsType = {
@@ -30,305 +66,55 @@ export type TileRenderPropsType = {
   renderModality: RenderModality,
   scales: Scales,
   objectSize: MapSize,
-  baseTileUrl: string,
-  tileUrlBuilder: TileUrlBuilderParam => string,
-  tilePromise?: string => Promise<any>,
-  translateExtent?: ?Array<Array<number>>,
-  onZoomed: ZoomTile => any,
+  translateExtent?: ?Array<Array<number>>, //per ora sappiamo che dovremo affrontarlo
+  onZoomed: ZoomMap => any,
   tiles: Tiles,
-  onMouseMove?: (Array<number>) => any
+  onMouseMove?: (Array<number>) => any,
+  onDoubleClickFilter?: (Array<HTMLElement>) => boolean,
+  onMouseDownFilter?: (Array<HTMLElement>) => boolean,
+  onClickFilter?: (Array<HTMLElement>) => boolean,
+  referenceSystemScales: ReferenceSystemScales,
+  schemaBoundary: SchemaBoundary,
+  debugGrid?: boolean,
+  tileCache: MapTileCache
 };
 ```
 
-### SvgTile
+Diverse proprietà sono dei tipi complessi a loro volta definiti nella libreria.
+Alcune di queste proprietà non devono essere definite nel container ma sono informazioni che vengono derivate dai selettori dallo stato base alle azioni compiute; pertanto il container si deve preoccupare solo di passarle al componente dopo aver invocato i selettori. Di seguito vediamo le proprietà elencate.
 
-Le props del componente sono definite dal seguente type:
 
-```js
-export type SvgRenderPropsType = {
-  uuid: string,
-  width: number,
-  height: number,
-  top?: number,
-  left?: number,
-  transform: ZoomTransform,
-  translateExtent?: Array<Array<number>>,
-  onZoomed: ZoomTile => any,
-  scales: Scales,
-  viewportObjectPosition: ViewportObjectPosition, //posizionamento
-  svgContent: string,
-  onMouseMove: (Array<number>) => any
-};
-```
+#### onZoomed
 
-### GeoTileRender
+Callback che invoca l'action **zoomMap**, serve per scrivere nello store il nuovo stato di posizionamento della mappa a seguito di azioni di movimento programmatiche o interazioni dell'utente con lo schema con il mouse. I parametri sono valori calcolati da d3 e reperibili nell'evento **d3-event** a cui è agganciata la callback. 
 
-Le props del componente sono definite dal seguente type:
+**Non è necessario interagire con essa, nè bisogna mai invocare zoomMap esplicitamente!!!!!**
+
+Serve per riportare i valori di d3 nello store; per effettuare degli spostamenti programmatici l'azione da utilizzare è **moveMap**.
+
+Dettaglio:
 
 ```js
-export type TileRenderPropsType = {
-  uuid: string,
-  width: number,
-  height: number,
-  top?: number,
-  left?: number,
-  viewportObjectPosition: ViewportObjectPosition, //posizionamento
-  renderModality: RenderModality,
-  scales: Scales,
-  objectSize: MapSize,
-  baseTileUrl: string,
-  tileUrlBuilder: TileUrlBuilderParam => string,
-  tilePromise?: string => Promise<any>,
-  translateExtent?: ?Array<Array<number>>,
-  onZoomed: ZoomTile => any,
-  tiles: Tiles,
-  onMouseMove?: (Array<number>) => any
-};
-```
-
-### ScaleSelector
-
-Le props del componente sono definite dal seguente type:
-
-```js
-type Props = {|
-  onClick: (string, number) => any,
-  scales?: Array<number>,
-  selectedScale: number,
-  visible: boolean,
-  className: string,
-  uuid: string
-|};
-```
-
-ScaleSelectorContainer è lo stesso componente esportato con il seguente stile
-
-```js
- style={{position:"absolute", bottom: "1px"}}
-```
-
-### ZoomScaleInfo
-
-Le props del componente sono definite dal seguente type:
-
-```js
-type Props = {|
-  className: string,
-  scaleCurrentDecimal: number,
-  scaleMin: number,
-  scalesSize: number
-|};
-```
-
-ZoomScaleInfoContainer è lo stesso componente esportato con il seguente stile
-
-```js
- style={{position:"absolute", bottom: "1px", right: "1px"}}
-```
-
-## Modulo maps
-
-### Reducer maps
-
-Reducer _maps_ che consente di gestire mappe multiple tramite tiles o singoli svg.
-
-```js
-//reducers.js
-import {
-  combineReducersAndSelector,
-  type ReducersMap
-} from "@stweb-lib/redux-helper";
-import { maps, setRootMaps } from "@stweb-lib/d3-maps";
-
-const reducersMap: ReducersMap = {
-  maps: [maps, setRootMaps]
-};
-export default combineReducersAndSelector(reducersMap);
-```
-
-Lo stato è rappresentato dal types **MapsRecord**.
-
-Il modulo esporta:
-
-- **maps**: il reducer,
-- **initialMapRecord**: porzione di stato relativa ad una singola mappa.
-- **initialMapsRecord**: lo stato completo di schemi multipli
-
-```js
-export interface TileIndex {
-  z: number;
+export interface ZoomMap {
+  currentExpScale: number;
+  uuid: string;
   x: number;
   y: number;
 }
 
-export interface TileValue {
-  tile: string;
-  timestamp: number;
-}
-
-export interface MapRecord {
-  creationDate: number;
-  currentExpScale: ?number;
-  defaultExpScale: number;
-  expScaleOffset: ?number;
-  height: number;
-  initExpScale: number;
-  maxExpScale: number;
-  minExpScale: number;
-  projection: string;
-  renderModality: RenderModality;
-  transformX: ?number;
-  transformY: ?number;
-  uuid: string;
-  viewPortHeight: number;
-  viewPortWidth: number;
-  width: number;
-  scaledObjectTranslationX: number;
-  scaledObjectTranslationY: number;
-  viewPortTranslationX: number;
-  viewPortTranslationY: number;
-  objectExpScale: number;
-  objectPosition: Array<number>;
-  tileCacheMap: Map<string, TileValue>;
-  tileCacheUpdateTime: number;
-  baseTileServiceurl: string;
-  tileExpiration: number;
-}
-
-export const initialMapRecord = {
-  creationDate: 0,
-  currentExpScale: null,
-  defaultExpScale: 1,
-  expScaleOffset: null,
-  height: 0,
-  initExpScale: 1,
-  maxExpScale: 1,
-  minExpScale: 1,
-  projection: "",
-  renderModality: "",
-  transformX: null,
-  transformY: null,
-  uuid: "",
-  viewPortHeight: 0,
-  viewPortWidth: 0,
-  width: 0,
-  scaledObjectTranslationX: 0,
-  scaledObjectTranslationY: 0,
-  viewPortTranslationX: 0,
-  viewPortTranslationY: 0,
-  objectExpScale: 1,
-  objectPosition: [0, 0],
-  tileCacheMap: new Map(),
-  tileCacheUpdateTime: 0,
-  baseTileServiceurl: "",
-  tileExpiration: NaN
-};
-
-export type Maps = Map<string, MapRecord>;
-export type MapsRecord = {
-  maps: Maps
-};
-
-
-export const initialMapsRecord: MapsRecord = {
-  maps: new Map()
-};
+onZoomed: ZoomMap => any
 ```
 
-I campi presenti nello stato ci permettono di renderizzare le tile che sono state caricate durante la navigazione, gestire il posizionamento programmatico dello schema, zoom e pan attraverso il mouse, calcolo delle tiles necessarie e relativa cache.
+#### tiles
 
-### Actions di maps
+Contiene le informazioni legate alle tiles che devono essere renderizzate in base alla posizione che si vuole vedere sulla mappa, allo zoom e alla dimensione della viewport. Vi sono gli indici delle tiles da caricare, il livello di scala ricalcolato in base all'indice delle tile z attuale e la traslazione sempre ricalcolato in base alle tiles attuali. Questo concetto viene spiegato in dettaglio nella sezione sul funzionamento della libreria; per ora pensiamo che si tratta di uno spostamento e di un cambio zoom "piccolo" che non richiede nuove tile, ma basta spostare o zoomare quelle presenti.
 
-- **initMap**
-- **moveMap**
-- **zoomMap**
-- **resizeMap**
-- **removeMap**
+**Non deve essere definita ma presa dal selettore obbligatoriamente!!**
 
 ```js
-export type InitMap = {|
-  defaultExpScale: number,
-  expScaleOffset: number,
-  height: number,
-  initExpScale: number,
-  maxExpScale: number,
-  minExpScale: number,
-  objectExpScale?: number,
-  renderModality: RenderModality,
-  scaledObjectTranslationX?: number,
-  scaledObjectTranslationY?: number,
-  uuid: ?string,
-  viewPortHeight?: number,
-  viewPortTranslationX: number,
-  viewPortTranslationY: number,
-  viewPortWidth?: number,
-  width: number,
-  objectPosition?: Array<number>,
-  baseTileServiceurl: string,
-  tileExpiration: number
-|};
 
-export type MoveMap = {|
-  uuid: string,
-  objectExpScale: number,
-  scaledObjectTranslationX: number,
-  scaledObjectTranslationY: number,
-  viewPortTranslationX: number,
-  viewPortTranslationY: number
-|};
+tiles: Tiles
 
-export type ZoomTile = {|
-  currentExpScale: number,
-  uuid: string,
-  x: number,
-  y: number
-|};
-
-export type ResizeTile = {|
-  uuid: string,
-  viewPortWidth: number,
-  viewPortHeight: number
-|};
-
-export type RemoveMap = {|
-  uuid: string
-|};
-
-/*----- Actions ----- */
-export const initMap = (initTile: InitMap): Action<InitMap>;
-export const moveMap = (moveMap: MoveMap): Action<MoveMap>;
-export const zoomMap = (zoomMap: ZoomTile): Action<ZoomTile>;
-export const resizeMap = (resizeMap: ResizeTile): Action<ResizeTile>;
-export const removeMap = (removeMap: RemoveMap): Action<RemoveMap>;
-```
-
-### Selectors maps
-
-- setRootMaps
-- getMapsRoot: ritorna un oggetto di type MapsRecord
-- getMapsUuids: ritorna un oggetto di type Set\<string>
-- getMapsTilesByUuid: ritorna un oggetto di type TilesByUuidT
-- getViewPortSizeByUuid: ritorna un oggetto di type ViewPortByUuid
-- getMapSizeByUuid: ritorna un oggetto di type MapSizeByUuid
-- getRenderModalityByUuid: ritorna un oggetto di type RenderModalityBuUuid
-- getMapTransformByUuid: ritorna un oggetto di type MapTransformByUuidT
-- getReferenceSystemScalesByUuid: ritorna un oggetto di type ReferenceSystemScalesByUuid
-- getMapIntegerScalesArrayByUuid: ritorna un oggetto di type IntegerScalesArrayByUuid
-- getScalesByUuid: ritorna un oggetto di type ScalesByUuid
-- getViewportObjectPositionByUuid: ritorna un oggetto di type ViewportObjectPositionByUuid
-- isReadyByUuid: ritorna un oggetto di type IsReadyByUuidT
-- isMultipleScalesByUuid: ritorna un oggetto di type IsMultipleScalesByUuid
-
-I types sono di seguito riportati
-
-```js
-//getMapsTilesByUuid
-export type TilesByUuidT = Map<string, Tiles>;
-export type Tiles = Array<ParamTiles> & {
-  scale: number,
-  translate: Array<number>,
-  z: number
-};
 export type ParamTiles = {
   x: number,
   y: number,
@@ -337,78 +123,324 @@ export type ParamTiles = {
   ty: number
 };
 
-//getViewPortSizeByUuid
-export type ViewPortByUuid = Map<string, ViewPort>;
-export type ViewPort = {|
-  viewPortWidth: number,
-  viewPortHeight: number
-|};
+export type Tiles = Array<ParamTiles> & {
+  scale: number,
+  translate: Array<number>,
+  z: number
+};
 
-//getMapSizeByUuid
-export type MapSizeByUuid = Map<string, MapSize>;
+```
+
+#### referenceSystemScales
+
+Sono i valori del "sistema di riferimento" della scala dell'oggetto che andiamo a renderizzare con le tiles. 
+
+**Non deve essere scritta esplicitamente ma ricavata dal selettore**
+
+```js
+export interface ReferenceSystemScales {
+  currentScale: number;
+  defaultScale: ?number;
+  currentScaleInt: number;
+  maxScale: number;
+  minScale: number;
+}
+```
+
+
+#### schemaBoundary
+
+Serve per capire se lo schema può ancora muoversi verticalmente o orizzontalmente: contiene le distanze tra la fine dello schema e i bordi della viewport. Per ora non è utilizzato per bloccare il pan fuori dallo schema; è da capire come usare le funzioni di d3 direttamente come nel caso di rendergin di svg senza tiles.
+
+**Non deve essere scritta esplicitamente ma ricavata dal selettore**
+
+```js
+export type SchemaBoundary = {|
+  top: number,
+  left: number,
+  right: number,
+  bottom: number
+|};
+```
+
+#### tileCache
+
+Cache delle tile per singolo schema e va passata al componente. E' descritta in dettaglio nella sezione del middleware.
+
+**Non deve essere scritta esplicitamente ma ricavata dal selettore**
+
+```js
+export interface TileValue {
+  tile: string;
+  timestamp: number;
+}
+
+export interface MapTileCache {
+  tileCacheMap: Map<string, TileValue>;
+  tileCacheUpdateTime: number;
+}
+```
+
+#### viewportObjectPosition
+
+E' l''oggetto che descrive il posizionamento dello schema a seguito di una action esplicita di movimento, ovvero una dispacth di **moveMap**. I valori che lo compongono sono derivati dallo store dal relativo selettore. Questi sono la scala a cui si deve portare, il posizionamento della viewport rispetto all'oggetto originale, e lo spostamento eventuale dell'oggetto all'interno della viewport alla scala voluta. objectPosition per ora è riportato per comodità ma infuturo potrà essere tolto incorporando i calcoli internamento.
+
+**Anche questa properties non deve essere scritta esplicitamente ma solo ricavata dal selettore che fa i calcoli, si usa la moveMap per comandare**
+
+
+```js
+/**
+ * Posizione dell'oggetto nella viewport con la relativa scala.
+ * Per ora abbiamo sia la scaledObjectTranslation sia objectPosition
+ * in futuro da usare solo objectPosition e portare i calcoli dentro
+ */
+export type ViewportObjectPosition = {|
+  scaledObjectTranslation: Array<number>, //traslazione dell'oggetto scalato di objExpScale nella vieport
+  viewport: Array<number>, //traslazione dell'origine della viewport
+  objectExpScale: number, //scala esponenziale dell'oggetto
+  objectPosition: Array<number> //posizione dell'oggetto equivalente alla traslazione
+|};
+```
+
+Non sono immediati da capire i valori sopra e verranno ripresi nella sezione del funzionamento. Per ora pensiamo che per muovere l'oggetto possiamo pensare di mettere un punto della viewport, definito da viewport, sopra un punto dello schema, definito da scaledObjectTranslation, allo scala a cui vogliamo "vedere" lo schema.
+
+Meglio si potrebbe dire che si applicano tre passi come nelle trasformazioni grafiche:
+
+1. Sposto nell'origine
+2. Scalo
+3. Traslo della quantità scalata
+
+
+#### renderModality
+
+E' il tipo di scala e oggetti che andiamo a renderizzare, nel nostro caso sarà EXP_RENDER_MODALITY che indica un oggetto piano in scala logaritmica. Come vedramo è un parametro della initMap.
+Può valere anche LINEAR_RENDER_MODALITY se la scala dell'oggetto di partenza è lineare e non logaritmica.
+
+**Non deve essere scritta esplicitamente ma ricavata dal selettore**
+
+#### scales
+
+Sono le scale dell'oggetto definite con la initMap più quella corrente.
+**Non deve essere scritta esplicitamente ma ricavata dal selettore**
+
+```js
+/**
+ * Informazioni sulla scala dell'oggetto
+ */
+export type Scales = {|
+  currentExpScale: ?number,
+  defaultExpScale: number,
+  initExpScale: number,
+  maxExpScale: number,
+  minExpScale: number
+|};
+```
+
+
+#### objectSize
+
+Sono le dimensioni dell'oggetto.
+**Non deve essere scritta esplicitamente ma ricavata dal selettore**
+
 export type MapSize = {|
   width: number,
   height: number
 |};
 
-//getRenderModalityByUuid
-export type RenderModalityBuUuid = Map<string, RenderModality>;
-export type RenderModality =
-  | ExpRenderModalityT
-  | LinearRenderModalityT
-  | SingleLinearRenderModalityT
-  | SingleExpRenderModalityT;
+#### width, height
 
-//getMapTransformByUuid
-export type MapTransformByUuidT = Map<string, ZoomTransform>;
-export type ZoomTransform = {|
-  transformX: ?number,
-  transformY: ?number,
-  currentExpScale: ?number
+Sono le dimensioni della viewport, vengono inizializzate con la initMap. Queste possono cambiare se c'è un resize, in questo caso occorre fare la dispatch della action resizeMap con le nuove dimensioni.
+
+**Non deve essere scritta esplicitamente ma ricavata dal selettore**
+
+```js
+export type ViewPort = {|
+  viewPortWidth: number,
+  viewPortHeight: number
 |};
+```
 
-//getReferenceSystemScalesByUuid
-export type ReferenceSystemScalesByUuid = Map<string, ReferenceSystemScales>;
-export type ReferenceSystemScales = {|
-  currentScale: number,
-  defaultScale: ?number,
-  currentScaleInt: number,
-  maxScale: number,
-  minScale: number
-|};
 
-//getMapIntegerScalesArrayByUuid
-export type IntegerScalesArrayByUuid = Map<string, Array<number>>;
+#### uuid
+Identifica univocamente lo schema, lo stesso da usare nella initMap, è di tipo string.
 
-//getScalesByUuid
-export type ScalesByUuid = Map<string, Scales>;
-export type Scales = {|
-  currentExpScale: ?number,
-  currentIntObjectScale: number,
-  defaultExpScale: number,
-  expScaleOffset: ?number,
-  initExpScale: number,
-  maxExpScale: number,
-  minExpScale: number
-|};
 
-//getViewportObjectPositionByUuid
-export type ViewportObjectPositionByUuid = Map<string, ViewportObjectPosition>;
-export type ViewportObjectPosition = {|
-  scaledObjectTranslation: Array<number>, //traslazione dell'oggetto scalato di objExpScale nella vieport
-  viewport: Array<number>, //traslazione dell'origine della viewport
-  objectExpScale: number //scala esponenziale dell'oggetto
-|};
+#### top?, left?
 
-//isReadyByUuid
-export type IsReadyByUuidT = Map<string, boolean>;
+Servono per il posizionamento della viewport. Sono da lasciare a 0 o omettere se non in casi estremamente rari!
 
-//isMultipleScalesByUuid
-export type IsMultipleScalesByUuid = Map<string, boolean>;
+
+#### onMouseMove
+
+Callbakck di movimento del mouse, riporta le coordinate sullo schema
+
+```js
+onMouseMove?: (Array<number>) => any
+```
+
+
+#### onDoubleClickFilter?: (Array<HTMLElement>) => boolean
+
+Callback per intercettare il doppio click del mouse sullo schema. Il parametro contiene un array che è il **path** degli elementi svg su cui è propagato l'evento partendo quello più incapsulato e via via tutti i parenti non oltre il tag svg. I successivi sono filtrati perché non di interesse ai fini dell'interazione con lo schema.
+**La funzione ritorna un booleano** questo serve per impedire che venga eseguita l'azione di dafault di d3 ad esempio zoom o pan e ed eseguire un'azione specifica per l'utilizzatore.
+
+Valori di ritorno:
+
+**true** => viene eseguita l'azione di d3
+**false** => viene bloccata l'azione di d3.
+
+Il funzionamento prevede ad esempio che si cerchi un eventuale elemento nell'array **path** e a seguito del risultato eseguire un'azione specifica e tornare false o tornare true e lasciare a d3.
+
+```js
+onDoubleClickFilter?: (Array<HTMLElement>) => boolean
+```
+
+
+#### onClickFilter?: (Array<HTMLElement>) => boolean,
+
+Esattamente come onDoubleClickFilter ma per il click singolo.
+
+```js
+onClickFilter?: (Array<HTMLElement>) => boolean
+```
+
+#### onMouseDownFilter?: (Array<HTMLElement>) => boolean
+
+Come sopra ma per il mousedown. Attenzione che questa se torna false inibisce il pan!
+
+```js
+onMouseDownFilter?: (Array<HTMLElement>) => boolean
+```
+
+## Actions modulo maps
+
+### initMap
+
+E' la prima action da utilizzare per inizializzare il modulo al rendering di uno schema. Contiene tutti i dati iniziali per il successivo funzionamento del rendering con le tile. Dimensione della viewport, dimensione dello schema, scale di default, scala iniziale, posizionamento iniziale, renderModality, url base per le tiles, intervallo di scadenza delle tiles.
+
+I parametri di posizionamento iniziale e scale vanno calcolati con le funzioni:
+
+**calObjExpScale**: funzione di calcolo della scala interna per lo store date le dimnensioni dello schema, il tipo di rendering, e la scala logaritmica o lineare voluta.
+
+**calcObjectTranslation**: calcolail punto dell'oggetto alla scala voluta per il posizionamento iniziale; di norma si pensa che il punto di posizionamento iniziale possa stare nell'origine della viewport altrimenti anche essa va traslata
+
+```js
+const init = {
+      uuid: UUID_PROVA,
+      defaultExpScale,
+      expScaleOffset: 2,
+      height: HEIGHT,
+      initExpScale,
+      maxExpScale,
+      minExpScale,
+      renderModality: EXP_RENDER_MODALITY,
+      viewPortHeight: rect.height,
+      viewPortWidth: rect.width,
+      width: WIDTH,
+      objectExpScale: initExpScale,
+      scaledObjectTranslationX: initObjectPosition[0],
+      scaledObjectTranslationY: initObjectPosition[1],
+      viewPortTranslationX: 0,
+      viewPortTranslationY: 0,
+      objectPosition: [WIDTH / 2, HEIGHT / 2],
+      baseTileServiceurl: baseUrl,
+      tileExpiration: 60000
+};
+    
+initMap(init);
 
 ```
 
-### Middleware caricamento e chache delle tiles
+### moveMap
+
+E' la action che permette di muovere o zoomare lo schema in modo programmatico. Accetta diversi parametri perché necessita di sapere **quale punto della viewport deve essere allineato con lo schema alla scala voluta** (questo va concetto va stampato nel cervello).
+
+Per calcolare tali valori si devono usare le funzioni della libreria come sopra; in più le funzioni 
+
+**calcCoordsforTiles** calcola la posizione nello schema dato un punto della vieport alla scala di default dello schema
+**convertCoordsForTiles** converte la posizione calcolata sopra alla scala corrente, **vanno usate una dopo l'altra**
+
+```js
+      this.props.moveMap({
+        uuid,
+        objectExpScale,
+        scaledObjectTranslationX: newObjectPosition[0],
+        scaledObjectTranslationY: newObjectPosition[1],
+        viewPortTranslationX: viewportPosition[0],
+        viewPortTranslationY: viewportPosition[1],
+        objectPosition: schemaPosition
+      });
+```
+Nella demo è utilizzata ad esempio per il cambio scala mantenendo il centro della viewport sul centro dello schema!!
+
+E' da rivedere per due motivi:
+
+1. Si può semplificare usando internamente delle API di più alto livello di d3 per muovere solo lo schema fissando l'origine della viewport come riferimento. Questo potrebbe anche essere una action diversa che oltretutto potrebbe sfruttare il bouding di d3 per non uscire dallo schema capendo come farlo funzionare con le tiles (bounding definito da una funzione).
+
+2. Se eseguita una volta, poi lo schema viene mosso e rieseguita con gli stessi valori non si ottiene nulla ... di fatto non cambiando i valori nello store non avviene un nuovo movimento perché internamente dove si chiama l'api di d3 è fatta una differenza con le props precedenti nella componentDidUpdate... Non è tanto un problema di PureComponent necessario per non renderizzare tile sinutilimente con tempi troppo lunghi ma prorpio che quei valori sono uguarli rispetto a prima, ci vuole qualcosa che dica che è stato fatto un movimento programmatico, un timestamp per esempio.
+
+
+### zoomMap
+
+Già citata in precedenza è la action che scatta automaticamente e che in container deve solo mappa sulla callback onZoomed, serve per scrivere i nuovi dati di posizionamento per il calcolo delle tiles nello store.
+
+```js
+export interface ZoomMap {
+  currentExpScale: number;
+  uuid: string;
+  x: number;
+  y: number;
+}
+```
+
+
+### resizeMap
+
+Action che fa il resize dello schema a seguito di un cambio di dimensioni della viewport, ad sempio dopo un resize. da usare sempre dopo una debounce di 500ms.
+
+```js
+export type ResizeMap = {|
+  uuid: string,
+  viewPortWidth: number,
+  viewPortHeight: number
+|};
+```
+
+
+### removeMap
+
+Action che cancella il record dallo store con la cache delle tile associata.
+
+```js
+export type RemoveMap = {|
+  uuid: string
+|};
+```
+
+### storeTileMap
+
+Action sparata dal middleware per memorizzare nella cache le tiles ricevuta dal server. Scatta in automatico.
+
+```js
+/**
+ * Tile con relativa tripletta di indicizzazione da mettere nella cache dello store.
+ * zoomIndex sarebbe la z o la scala se siamo in exp.
+ */
+export interface StoreTileMap {
+  uuid: string;
+  z: number;
+  x: number;
+  y: number;
+  tile: string;
+  timestamp: number;
+}
+```
+
+
+
+
+
+## Middleware caricamento e cache delle tiles
 
 Di base le tiles sono identificate dalla tripletta (z, x, y) come nel formato Slippy Map. **z** indica il livello di zoom, **x** e **y** gli indici orizzonatali e vericali.
 In assenza di cache le tiles venivano caricate da ciascun componente **\<Tile ...\>** in modo autonomo con una fetch nel "mount" del componente Tile stesso. Non c'è quindi nessun meccanismo di cache perché ogni tile viene ricreata al variare degli indici, l'unica ottimizzazione era che il componente **\<tile \>** era derivato da **React.PureComponent**.
@@ -442,7 +474,8 @@ Il caso logaritmico è di particolare interesse perché quello usato dal modulo 
 
 #### Fetch tiles dal server
 
-La fetch delle tiles dal server parte costruzione della url del servizio. Nello stato è presente un campo che è **baseTileServiceurl**; a questo attraverso la funzione **tileUrlBuilder** viene costruita la url con i parametri zommIndex (z o la scala di riferimento), x e y che identificano la tile da richiedere.
+Per effettuare la fetch delle tiles dal server nello stato è presente un campo che è **baseTileServiceurl**; con questo attraverso la funzione **tileUrlBuilder** viene costruita la url con i parametri zommIndex (z o la scala di riferimento), x e y che identificano la tile da richiedere.
+E' presente un set **pendingFetchSet** indicizzato con le url delle richieste delle tiles per che contiene le fetch in stato di pending e che non devono essere rieseguite fintanto che sono in questo stato.
 
 #### Update e pulizia della cache
 
@@ -1081,4 +1114,23 @@ svg.call(
 );
 ```
 
+
+### Limiti di pan e zoom
+
+Le API qui esposte non tengono presente di vincoli di scala e traslazione che si possono imporre con translateExtent e scaleExtent di d3.
+Per essere coerenti con questi vicoli occorre usare funzioni tipo
+
+```javascript
+zoom.translateBy
+zoom.translate
+...
+```
+
+Queste funzionano correttamente al momento per il rendering di un singolo svg e sono usate infatti nel componente **ZoomingSurface**. Per utilizzarle anche nel caso tile occorre investigare su come definire l'extent mediante funzioni al variare delle tiles.
+
+Un altro spunto per la limitazione di pan e zoom potrebbe essere quello di bloccare la mouseDown di default di d3-zoom quando si è raggiunto il limite dello schema, già calcolato dai selector di boundary.
+
 [1](https://marketplace.visualstudio.com/items?itemName=goessner.mdmath) Visual Studio Code  Markdown + Math
+[2](https://github.com/d3/d3-tile) d3-tile
+[3](https://github.com/d3/d3-zoom) d3-zoom
+[4](https://github.com/d3/d3-selection) d3-selection

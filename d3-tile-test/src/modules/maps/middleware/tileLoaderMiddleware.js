@@ -6,37 +6,25 @@ import {
   type Dispatch
 } from "@stweb-lib/redux-helper";
 import { ZOOM_MAP } from "../actionDefinitions";
-import { storeTileMap } from "../actionCreators";
+import {
+  storeTileMap,
+  storeMetaTileMap,
+  loadingTilesMap
+} from "../actionCreators";
 import { serializeTileIndex } from "../utils";
 import {
   type Tiles,
   type ParamTiles,
   type MapsRecord,
   MapRecord,
-  TileValue
+  TileValue,
+  TileIndex
 } from "../types";
 import { ReferenceSystemScales } from "../../../types/maps";
 import {
   getMapsTilesByUuid,
   getReferenceSystemScalesByUuid
 } from "../selectors";
-
-/**
- * Vogliamo intercettare le action di move map e fare le fetch per
- * caricare le tile svg nello store. Dopo spariamo la action che è stata caricata.
- * L'ipotesi è gestire anche la cache.
- */
-
-const defaultTileUrlBuilder = (
-  baseUrl: string,
-  width: number,
-  height: number,
-  x: number,
-  y: number,
-  zoomIndex: number
-) => {
-  return `${baseUrl}/${width}/${height}/${zoomIndex}/${x}/${y}?id=none&infoDAL=none&codApp=none`;
-};
 
 function isTileExpired(tileValue: TileValue, tileExpiration: number): boolean {
   if (tileExpiration === Infinity) return false;
@@ -45,6 +33,25 @@ function isTileExpired(tileValue: TileValue, tileExpiration: number): boolean {
   }
 }
 
+/**
+ * Calcola l'indice del metatile 3x3 a cui la tile iniziando da 0,0 che viene tagliata dal server.
+ * E' come se shiftassi di 1,1 e allora lo aggiungo all'indice di partenza per calcolare in che metatile mi trovo.
+ * La tile centrale dato l'indice del metatile è xMt = ixMt * 3
+ * @param {TileIndex} index indice della tile di cui voglio conoscere il metatile
+ */
+function getMataTileIndex(index: TileIndex): TileIndex {
+  const ixMt = Math.floor((index.x + 1) / 3);
+  const xMt = /*1 + */ ixMt * 3;
+  const iyMt = Math.floor((index.y + 1) / 3);
+  const yMt = /*1 + */ iyMt * 3;
+  return { x: xMt, y: yMt, z: index.z };
+}
+
+/**
+ * Vogliamo intercettare le action di move map e fare le fetch per
+ * caricare le tile svg nello store. Dopo spariamo la action che è stata caricata.
+ * L'ipotesi è gestire anche la cache.
+ */
 export type TileUrlBuilderF = (
   baseUrl: string,
   width: number,
@@ -87,15 +94,27 @@ export function createTileLoaderMiddleware(tileUrlBuilder: TileUrlBuilderF) {
         ) {
           //const currentScaleInt = refSystem.currentScaleInt;
           tiles.forEach((t: ParamTiles) => {
-            // dispatch to sotre new tile in the cache -> storeTileMap
-            const index = serializeTileIndex({ z: t.z, x: t.x, y: t.y });
-            //console.log(index);
-            const tileFound = map.tileCacheMap.get(index);
-            if (
-              (!tileFound || isTileExpired(tileFound, map.tileExpiration)) &&
-              !pendingFetchSet.has(index)
-            ) {
-              const url = tileUrlBuilder(
+            let index = null;
+            let url = "";
+            if (map.useMetaTile === true) {
+              const metaTileIndex: TileIndex = getMataTileIndex({
+                z: t.z,
+                x: t.x,
+                y: t.y
+              });
+              index = serializeTileIndex(metaTileIndex);
+              url = tileUrlBuilder(
+                map.baseTileServiceurl,
+                map.width,
+                map.height,
+                metaTileIndex.x,
+                metaTileIndex.y,
+                refSystem.currentScaleInt
+              );
+            } else {
+              // dispatch to sotre new tile in the cache -> storeTileMap
+              index = serializeTileIndex({ z: t.z, x: t.x, y: t.y });
+              url = tileUrlBuilder(
                 map.baseTileServiceurl,
                 map.width,
                 map.height,
@@ -103,7 +122,23 @@ export function createTileLoaderMiddleware(tileUrlBuilder: TileUrlBuilderF) {
                 t.y,
                 refSystem.currentScaleInt
               );
-              pendingFetchSet.add(index);
+            }
+
+            const tileFound = map.tileCacheMap.get(index);
+            if (
+              (!tileFound || isTileExpired(tileFound, map.tileExpiration)) &&
+              url !== "" &&
+              !pendingFetchSet.has(url)
+            ) {
+              if (map.loading !== true && pendingFetchSet.size === 0) {
+                dispatch(
+                  loadingTilesMap({
+                    uuid,
+                    loading: true
+                  })
+                );
+              }
+              pendingFetchSet.add(url);
               fetch(url)
                 .then(r => {
                   if (r.ok === true) return r.json();
@@ -116,21 +151,54 @@ export function createTileLoaderMiddleware(tileUrlBuilder: TileUrlBuilderF) {
                       ", " +
                       new Date().toISOString()
                   );*/
-                  dispatch(
-                    storeTileMap({
-                      uuid: map.uuid,
-                      z: t.z,
-                      x: t.x,
-                      y: t.y,
-                      tile: response.schemaSvg,
-                      timestamp: new Date().getTime()
-                    })
-                  );
-                  pendingFetchSet.delete(index);
+                  if (map.useMetaTile === true) {
+                    const tiles = response.tileKeys.map(tileKey => {
+                      const s = tileKey.x + "-" + tileKey.y;
+                      return {
+                        x: tileKey.x,
+                        y: tileKey.y,
+                        z: t.z,
+                        tile: response.schemaMetaSvg[s]
+                      };
+                    });
+                    dispatch(
+                      storeMetaTileMap({
+                        uuid: map.uuid,
+                        tiles,
+                        timestamp: new Date().getTime()
+                      })
+                    );
+                  } else {
+                    dispatch(
+                      storeTileMap({
+                        uuid: map.uuid,
+                        z: t.z,
+                        x: t.x,
+                        y: t.y,
+                        tile: response.schemaSvg,
+                        timestamp: new Date().getTime()
+                      })
+                    );
+                  }
+                  pendingFetchSet.delete(url);
+                  if (pendingFetchSet.size === 0)
+                    dispatch(
+                      loadingTilesMap({
+                        uuid,
+                        loading: false
+                      })
+                    );
                 })
                 .catch(e => {
                   console.error(e);
-                  pendingFetchSet.delete(index);
+                  pendingFetchSet.delete(url);
+                  if (pendingFetchSet.size === 0)
+                    dispatch(
+                      loadingTilesMap({
+                        uuid,
+                        loading: false
+                      })
+                    );
                 });
             }
           });
@@ -141,88 +209,3 @@ export function createTileLoaderMiddleware(tileUrlBuilder: TileUrlBuilderF) {
     return next(action);
   };
 }
-
-const tileLoaderMiddleware = ({
-  getState,
-  dispatch
-}: {
-  getState: GetState,
-  dispatch: Dispatch
-}) => (next: Function) => (action: Action<*>) => {
-  if (action.type === ZOOM_MAP) {
-    // console.log("Detected action zoom map");
-    // console.log(action.payload);
-    let result = next(action);
-    // console.log("Dispatch action zoom map end");
-
-    //$FlowFixMe
-    const mapsRecord: MapsRecord = getState().get("maps");
-    if (mapsRecord) {
-      const { uuid } = action.payload;
-      const map: MapRecord | typeof undefined = mapsRecord.maps.get(uuid);
-      const tiles: Tiles | typeof undefined = getMapsTilesByUuid(
-        getState()
-      ).get(uuid);
-
-      //ignore per problemi di eslint
-      // prettier-ignore
-      const refSystem: ReferenceSystemScales | typeof undefined = 
-        getReferenceSystemScalesByUuid(getState()).get(uuid);
-
-      if (
-        tiles &&
-        refSystem &&
-        map &&
-        map.expScaleOffset &&
-        map.currentExpScale
-      ) {
-        //const currentScaleInt = refSystem.currentScaleInt;
-        tiles.forEach((t: ParamTiles) => {
-          // dispatch to sotre new tile in the cache -> storeTileMap
-          // prettier-ignore
-          const tileFound = map.tileCacheMap.get(serializeTileIndex({z: t.z, x: t.x, y: t.y}));
-          if (
-            !tileFound ||
-            isTileExpired(tileFound, map.tileExpiration) === true
-          ) {
-            const url = defaultTileUrlBuilder(
-              map.baseTileServiceurl,
-              map.width,
-              map.height,
-              t.x,
-              t.y,
-              refSystem.currentScaleInt
-            );
-            fetch(url)
-              .then(r => {
-                if (r.ok === true) return r.json();
-                else throw new Error(r.statusText);
-              })
-              .then(response => {
-                //console.log('Received tile: ' + svgString);
-                dispatch(
-                  storeTileMap({
-                    uuid: map.uuid,
-                    z: t.z,
-                    x: t.x,
-                    y: t.y,
-                    tile: response.schemaSvg,
-                    timestamp: new Date().getTime()
-                  })
-                );
-              })
-              .catch(e => {
-                console.error(e);
-              });
-          }
-        });
-      }
-    }
-
-    return result;
-  }
-
-  return next(action);
-};
-
-export { tileLoaderMiddleware };

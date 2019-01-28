@@ -16,7 +16,8 @@ import {
   type SchemaBoundaryByUuid,
   MapRecord,
   MapTileCache,
-  type MapsTileCacheByUuid
+  type MapsTileCacheByUuid,
+  type IsLoadingTilesByUuuid
 } from "./types";
 import { type ViewportObjectPositionByUuid } from "../../types";
 import { memoizedCalTiles, calcCoords, calcCoordsforTiles } from "./utils";
@@ -543,6 +544,19 @@ export const getMapsTilesCacheByUuid: State => MapsTileCacheByUuid = createSelec
           tileCacheUpdateTime: m.tileCacheUpdateTime
         };
         ret.set(uuid, cache);
+      });
+    }
+    return ret;
+  }
+);
+
+export const isLoadingTilesByUuid: State => IsLoadingTilesByUuuid = createSelector(
+  [getMapsRoot],
+  (mapsRecord: MapsRecord): IsLoadingTilesByUuuid => {
+    let ret = new Map();
+    if (mapsRecord.maps && mapsRecord.maps.size > 0) {
+      mapsRecord.maps.forEach((m: MapRecord, uuid: string) => {
+        ret.set(uuid, m.loading);
       });
     }
     return ret;

@@ -1,12 +1,12 @@
 //@flow
-import React from "react";
+import * as React from "react";
 import { select, event } from "d3-selection";
 import { zoom as d3Zoom, zoomIdentity } from "d3-zoom";
 import { ReactVisible } from "../commons";
 import { transformToString } from "../transforms";
 import { calcCoords } from "../../modules/maps/utils/coordinates";
 import { getMousePos } from "../../modules/maps/utils/mouse";
-import { type RefObject, type ZoomBehaviourTransform } from "../../types";
+import { type ZoomBehaviourTransform } from "../../types";
 import { ArrowUp, ArrowRight, ArrowBottom, ArrowLeft } from "../arrows";
 import { DEFAULT_SINGLE_SCHEMA_SHIFT } from "../../modules/maps/utils/constants";
 
@@ -32,7 +32,7 @@ export type ZoomingSurfaceProps = {
 };
 
 class ZoomingSurface extends React.Component<ZoomingSurfaceProps> {
-  svgRef: RefObject;
+  svgRef: any;
   svg: any;
   zoom: any;
   /* PROVVISORIO */
