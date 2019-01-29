@@ -26,10 +26,9 @@ It's useful to define a tolerance because of pixel approximation to detect the c
 The conditon will be:
 
 $$\bold{(d - T) \le (d1 + d2) \le (d + T)}$$
-<br>
 
 ![Alt text](./pointAndLine.svg)
-<img src="./pointAndLine.svg">
+
 
 ### Circle and line
 
