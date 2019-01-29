@@ -26,9 +26,9 @@ It's useful to define a tolerance because of pixel approximation to detect the c
 The conditon will be:
 
 <p align="center"><img src="/graphic-algebra/tex/b47e11305ee322e8aaf9a94cbd459599.svg?invert_in_darkmode&sanitize=true" align=middle width=229.67927235pt height=16.438356pt/></p>
-<br>
 
 ![Alt text](./pointAndLine.svg)
+
 
 ### Circle and line
 
