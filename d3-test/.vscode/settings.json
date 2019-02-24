@@ -1,5 +1,4 @@
 {
-    "javascript.validate.enable": false,
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -8,5 +7,6 @@
         "**/.DS_Store": true,
         "node_modules": true,
         ".cache": true
-    }
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

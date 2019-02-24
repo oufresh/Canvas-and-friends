@@ -1,19 +1,39 @@
-import React from 'react';
-import { Zoom } from './zoom/components/Zoom';
+import * as React from 'react';
 
 //const drawings = '<rect width="100" height="200" x="50" y="110" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><rect width="50" height="60" x="100" y="150" style="fill:rgb(255,0,255);stroke-width:3;stroke:rgb(0,0,0)" /><polygon data-id="2" points="100,10 40,198 190,78 10,78 160,198"style="fill:lime;stroke:purple;stroke-width:5;fill-rule:evenodd;" />';
 
-class App extends React.Component
+declare type MoveToType = {
+    tx: number,
+    ty: number,
+    scale: number,
+    px: number,
+    py: number  
+};
+
+export type TransformType = {
+    tx: number,
+    ty: number,
+    k: number
+};
+
+declare type AppState = {
+    pos: Array<number>,
+    moveTo: MoveToType,
+    target: any,
+    viewPort: Array<number>,
+    transform: TransformType
+};
+
+export class App extends React.Component<{}, AppState>
 {
-    constructor(props)
+    state: AppState;
+
+    constructor(props: {})
     {
         super(props);
 
         this.state = {
-            pos: {
-                x:0,
-                y: 0
-            },
+            pos: [0, 0],
             moveTo: {
                 tx: 400,
                 ty: 300,
@@ -22,7 +42,11 @@ class App extends React.Component
                 py: -100
             },
             target: null,
-            //transform: initialTransform,
+            transform: {
+                tx: 0,
+                ty: 0,
+                k: 1
+            },
             viewPort: [800, 600]
         };
 
@@ -32,20 +56,20 @@ class App extends React.Component
         this.onZoomed = this.onZoomed.bind(this);
     }
 
-    onMouseMove(pos)
+    onMouseMove(pos: Array<number>)
     {
-        this.setState(ps => {
+        this.setState((ps: AppState) => {
             return {
                 pos: pos,
                 target: ps.target,
-                transform: ps.transform,
+                //transform: ps.transform,
                 moveTo: ps.moveTo,
                 viewPort: ps.viewPort
             };
         });
     }
 
-    onDoubleClick(target)
+    onDoubleClick(target: any)
     {
         //console.log(target.dataset.id);
         this.setState(ps => {
@@ -59,7 +83,7 @@ class App extends React.Component
         });
     }
 
-    onZoomed(transform)
+    onZoomed(transform: TransformType)
     {
         this.setState(ps => {
             return {
@@ -72,7 +96,7 @@ class App extends React.Component
         });
     }
 
-    onDblClickZoom(mousePos) {
+    onDblClickZoom(mousePos: Array<number>) {
         const coords = [0,0];// calcCoords(this.state.transform, mousePos.x, mousePos.y);
         console.log(mousePos);
         console.log(coords);
@@ -80,15 +104,15 @@ class App extends React.Component
         this.setState(ps => {
             const moveTo = {
                 scale: this.state.transform.k + 0.5,
-                tx: mousePos.x,
-                ty: mousePos.y,
+                tx: mousePos[0],
+                ty: mousePos[1],
                 px: -coords[0],
                 py: -coords[1]
             };
             return {
                 pos: ps.pos,
                 target: ps.target,
-                transform: ps.transform,
+                //transform: ps.transform,
                 moveTo: moveTo,
                 viewPort: ps.viewPort
             };
@@ -101,14 +125,14 @@ class App extends React.Component
         return (
             <div>
                 <h3>D3 zoom test</h3>
-                <Zoom 
-                    viewPort={this.state.viewPort}
-                />
+                <div>
+                    
+                </div>
                 <div>
                     <table>
                         <tbody>
-                            <tr><td><strong>Mouse coord X</strong></td><td>{this.state.pos.x}</td></tr>
-                            <tr><td><strong>Mouse coord Y</strong></td><td>{this.state.pos.y}</td></tr>
+                            <tr><td><strong>Mouse coord X</strong></td><td>{this.state.pos[0]}</td></tr>
+                            <tr><td><strong>Mouse coord Y</strong></td><td>{this.state.pos[1]}</td></tr>
                             <tr><td><strong>Mouse coord model X</strong></td><td>{coords[0]}</td></tr>
                             <tr><td><strong>Mouse coord model Y</strong></td><td>{coords[1]}</td></tr>
                             <tr><td><strong>Double click target</strong></td><td>{this.state.target ? (this.state.target.nodeName + ", " + this.state.target.getAttribute("style")) : ""}</td></tr>
@@ -119,5 +143,3 @@ class App extends React.Component
         );
     }
 }
-
-export default App;
