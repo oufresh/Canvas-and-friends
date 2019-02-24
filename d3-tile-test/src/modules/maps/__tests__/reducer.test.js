@@ -83,7 +83,9 @@ describe("maps reducer", () => {
             tileCacheMap: new Map(),
             tileCacheUpdateTime: 0,
             baseTileServiceurl: "ciccio",
-            tileExpiration: 55
+            tileExpiration: 55,
+            loading: false,
+            useMetaTile: false
           }
         ]
       ])
@@ -148,7 +150,9 @@ describe("maps reducer", () => {
           tileCacheMap: new Map(),
           tileCacheUpdateTime: 0,
           baseTileServiceurl: "ciccio",
-          tileExpiration: 55
+          tileExpiration: 55,
+          loading: false,
+          useMetaTile: false
         }
       ]
     ]);

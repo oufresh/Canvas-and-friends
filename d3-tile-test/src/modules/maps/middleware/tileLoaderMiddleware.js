@@ -176,13 +176,3 @@ export function createTileLoaderMiddleware(
                 .catch(e => {
                   console.error(e);
                   pendingFetchSet.delete(url);
-                });
-            }
-          });
-        }
-      }
-      return result;
-    }
-    return next(action);
-  };
-}

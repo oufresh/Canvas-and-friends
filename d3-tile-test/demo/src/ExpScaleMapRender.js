@@ -403,7 +403,6 @@ class ExpScaleMapRender extends React.Component {
             objectSize={objectSize}
             onMouseMove={this.onMouseMove}
             baseTileUrl={baseUrl}
-            tileUrlBuilder={tileUrlBuilder}
             tilePromise={getStTilePromise}
             onDoubleClickFilter={this.onDoubleClickFilter}
             onClickFilter={this.onClickFilter}

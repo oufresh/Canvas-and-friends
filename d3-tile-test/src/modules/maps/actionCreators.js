@@ -37,7 +37,8 @@ export type InitMap = {|
   width: number,
   objectPosition?: Array<number>,
   baseTileServiceurl: string,
-  tileExpiration: number
+  tileExpiration: number,
+  useMetaTile: boolean
 |};
 
 export type MoveMap = {|

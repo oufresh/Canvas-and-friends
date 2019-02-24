@@ -83,6 +83,7 @@ export class TileRender extends React.Component<TileRenderPropsType> {
   /**
    *
    */
+  /*:: zoomed: () => void */
   zoomed() {
     const transform = event.transform;
     //console.log(transform);
@@ -110,6 +111,7 @@ export class TileRender extends React.Component<TileRenderPropsType> {
     //console.log('currentExpScale: ' + transform.k);
   }
 
+  /*:: onMouseMove: (SyntheticMouseEvent<HTMLElement>) => any; */
   onMouseMove(e: SyntheticMouseEvent<HTMLElement>) {
     const pos = getMousePos(e, this.svgRef.current);
     //console.log(pos);
@@ -263,6 +265,7 @@ export class TileRender extends React.Component<TileRenderPropsType> {
     return true;
   }
 
+  /*:: moveSchema: (string) => any */
   moveSchema(direction: string) {
     const {
       renderModality,

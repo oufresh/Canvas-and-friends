@@ -22,7 +22,7 @@ export interface CanvasProps {
     onMouseMove?: OnMouseFunc;
     onMouseClick?: OnMouseFunc;
     shapes: CanvasShapes;
-    mousePos: CanvasPosition;
+    // mousePos: CanvasPosition;
     mouseHits: MouseHits;
 }
 
@@ -46,7 +46,7 @@ export function withContext<C extends React.ComponentClass>(Component: C): C {
       )) as any as C;
 }
 
-class Canvas extends React.Component<CanvasProps, CanvasState> {
+class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
     cRef: React.RefObject<HTMLCanvasElement>;
     cContext: CanvasRenderingContext2D | null;
     state: CanvasState;
@@ -68,11 +68,11 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
         }
     }
 
-    shouldComponentUpdate(nextProps: CanvasProps, nextState: CanvasState, context: any): boolean {
+    /*shouldComponentUpdate(nextProps: CanvasProps, nextState: CanvasState, context: any): boolean {
         // if (this.props.)
         this.clear();
         return true;
-    }
+    }*/
 
     componentDidMount() {
         this.cContext = this.cRef.current ? this.cRef.current.getContext('2d') : null;
@@ -96,7 +96,9 @@ class Canvas extends React.Component<CanvasProps, CanvasState> {
 
             this.props.shapes.lines.forEach((line: Line) => {
                 if (this.cContext) {
-                    Shape2Draw.drawLine(this.cContext, line);
+                    const hitLines = this.props.mouseHits.hits.get(DrawTypes.LINE);
+                    const hit = hitLines !== undefined ? hitLines.has(line.id) : false;
+                    Shape2Draw.drawLine(this.cContext, line, hit);
                 }
 
                 /*if (line instanceof ExpLine) {
