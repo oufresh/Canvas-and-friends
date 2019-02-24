@@ -1,0 +1,12 @@
+.grid-element {
+    background-color: rgba(110, 110, 110, 0.8);
+    text-align: center;
+    padding: 20px 0;
+    font-size: 30px;
+    width: 200px;
+    height: 200px;
+}
+
+.grid-element.enabled {
+    background-color: rgba(210, 210, 210, 0.8);
+}
