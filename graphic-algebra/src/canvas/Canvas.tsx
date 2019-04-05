@@ -3,10 +3,7 @@ import { getMousePos } from './canvasUtils';
 import { Polyline } from '../shapes/polyline';
 import { Line } from '../shapes/line';
 import { PCPoint } from './shapes/PPoint';
-import { circleInLine } from '../collisions/circleOnLine';
-import { pointInCircle } from '../collisions/pointInCircle';
 import { Point } from '../shapes/point';
-import { pointInPolygon } from '../collisions/pointInPolygon';
 import * as Shape2Draw from './shape2Draw';
 import { CanvasShapes, DrawTypes } from './canvasShapes';
 import { CanvasPosition } from './types';
@@ -163,6 +160,10 @@ class Canvas extends React.PureComponent<CanvasProps, CanvasState> {
                 shapes.push(<PCPoint key={'RPoint-' + point.id} point={point} hit={hit} />);
             }
         }*/
+
+        if (this.cContext) {
+            console.log("Context ok");
+        }
 
         return (
             <CanvasContext.Provider value={{ctx: this.cContext}}>
