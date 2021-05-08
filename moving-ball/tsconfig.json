@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "esModuleInterop": true,
+      "resolveJsonModule": true,
+      "allowSyntheticDefaultImports": true,
+      "sourceMap": true,
+      "jsx": "react",
+      "strict": true,
+      "module": "ES6",
+      "moduleResolution": "Node",
+      "outDir": "./build",
+      "preserveConstEnums": true,
+      "target": "ES6",
+      "lib": ["dom", "dom.iterable", "ES6"]
+    },
+    "exclude": [
+      "node_modules"
+    ],
+    "include": [
+        "src"
+      ]
+  }

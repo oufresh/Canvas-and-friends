@@ -1,0 +1,71 @@
+{
+    "descr": "Coefficiente di viscosità (mPa·s) Temperatura ( °C) 1P = 10PI, 1mP = 10mPI", 
+    "water": [{
+        "temp": 0,
+        "v": 1.79
+    }, {
+        "temp": 20,
+        "v": 1.00
+    }, {
+        "temp": 60,
+        "v": 0.65
+    }, {
+        "temp": 100,
+        "v": 0.28
+    }],
+    "glicerin": [
+        { "temp": 0, "v": 10000 },
+        { "temp": 20, "v": 1490 },
+        { "temp": 60, "v": 81 }
+    ],
+    "alcool": [
+        { "temp": 20, "v": 1.20 }
+    ],
+    "mercury": [
+        { "temp": 0, "v": 1.685 },
+        { "temp": 20, "v": 1.554 },
+        { "temp": 100, "v": 1.240 }
+    ],
+    "olive_oil": [
+        { "temp": 20, "v": 84 }
+    ],
+    "engine_oil": [
+        { "temp": 30, "v": 200 }
+    ],
+    "air": [{
+        "temp": 0,
+        "v": 17.4E-6
+    }, {
+        "temp": 18,
+        "v": 182.7E-6
+    }, { "temp": 27, "v": }]
+}
+
+
+
+Coefficiente di viscosità
+di alcuni gas
+Gas
+Viscosità
+(µP)
+Temperatura
+(°C)
+aria	170.8	0
+182.7	18
+argon	209.6	0
+221.7	20
+269.5	100
+elio	186.0	0
+194.1	20
+228.1	100
+idrogeno	83.5	0
+87.6	20.7
+metano	102.6	0
+108.7	20
+133.1	100
+neon	297.3	0
+311.1	20
+364.6	100
+ossigeno	189	0
+201.8	19.1
+256.8	127.7
